@@ -29,7 +29,7 @@ class Aliexpress(Driver):
         # embed()
         # query = self.item.db.select([self.item.item()])
         # ResultProxy = self.item.connection.execute(query)
-        # query = Item().db.query
+        # ResultSet = ResultProxy.fetchall()
         break
 
       self.driver.find_element_by_class_name('next-next').click()
