@@ -12,7 +12,7 @@ class LanguageUtils(object):
     if len(potential_list) == 0:
       return high_frequency_title[:3]
     else: 
-      potential_list
+      return potential_list
 
   @staticmethod
   def get_high_frequency_nouns(text):
@@ -22,7 +22,7 @@ class LanguageUtils(object):
     stop_words = set(nltk.corpus.stopwords.words('english'))
     word_tokens = nltk.word_tokenize(text)
     filtered_sentence = []
-    accepted_pos = ["NN", "NNS", "NNP", "NNPS"]
+    accepted_pos = ["NN", "NNS", "NNP", "NNPS"] # only want nouns and pronouns
 
     for (w,p) in nltk.pos_tag(word_tokens):
       if w not in stop_words and p in accepted_pos:
