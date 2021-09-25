@@ -1,7 +1,8 @@
-from utils.database import Database
+from utils.database import Item as ItemDB
+from utils.database import Database as db
 from IPython import embed
-
-class Item(Database):
+from sqlalchemy.orm.exc import NoResultFound
+class Item(db):
   UNIT_CONVERSION = {
     "CM": 2.54,
     "MM": 25.4,
@@ -10,34 +11,37 @@ class Item(Database):
 
   def __init__(self):
     super().__init__()
-    self.item()
+
+  def find_or_create(self, **kwargs):
+    try:
+      item = self.session.query(ItemDB).filter_by(title=kwargs["title"]).one() # filter on name
+    except NoResultFound:
+      item = self.new(**kwargs)
+    
+    return item
+
 
   def new(self, **kwargs):
-    title = self.create_title(kwargs["title_words"])
     dimensions_in_inches = self.dimensions(kwargs["dimensions"])
     weight = self.weight(kwargs["dimensions"])
 
-    query = self.db.insert(self.item()).values(
-      title=title,
+    new_item = ItemDB(
+      title=kwargs["title"], 
       price=kwargs["price"],
       shipping_price=kwargs["shipping_price"],
       shipping_price_10_units=kwargs["shipping_price_10_units"],
       length=dimensions_in_inches["length"],
       width=dimensions_in_inches["width"],
       height=dimensions_in_inches["height"],
-      weight=weight
+      weight=weight,
+      url=kwargs["url"],
+      category_id=kwargs["category_id"]
     )
 
-    self.connection.execute(query)
+    self.session.add(new_item)
+    self.session.commit()
+    return new_item
 
-
-  def create_title(self, values):
-    # TODO need to investigate why values is type None
-    if values == None or len(values) == 0:
-      return ""
-    else:
-      values.sort()
-      return '_'.join(values)
 
   # Need to save dimensions as inches
   def dimensions(self,values):
@@ -54,3 +58,4 @@ class Item(Database):
   # TODO need to make a reasonable guess at weight based on dimensions
   def weight(self,values):
     return 5
+  

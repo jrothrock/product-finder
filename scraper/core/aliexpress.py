@@ -1,13 +1,16 @@
 from drivers import *
 from IPython import embed
 from utils.language_utils import LanguageUtils
-from item import Item
+from utils.database import *
+from category import Category as CategoryModel
+from item import Item as ItemModel
 import re
-
+import time 
 class Aliexpress(Driver):
   def __init__(self):
     super().__init__()
-    self.item = Item()
+    self.category = CategoryModel()
+    self.item = ItemModel()
     self.scrape_pages()
 
   def scrape_pages(self):
@@ -27,21 +30,20 @@ class Aliexpress(Driver):
 
       if pages >= 1:
         # embed()
-        # query = self.item.db.select([self.item.item()])
-        # ResultProxy = self.item.connection.execute(query)
-        # ResultSet = ResultProxy.fetchall()
+        # Database().session.query(Item, Category).join(Category).first()
         break
 
       self.driver.find_element_by_class_name('next-next').click()
 
 
   def scrape_page(self, link):
+    time.sleep(1)
     self.driver.get(link)
     self.driver.execute_script('window.scrollTo(0,1000)')
     WebDriverWait(self.driver, 12).until(EC.visibility_of_element_located((By.ID, "product-description")))
     description_element = self.driver.find_element_by_id('product-description')
     title_element = self.driver.find_element_by_class_name('product-title-text')
-    title_words = LanguageUtils.get_important_title_words(title_element.text, description_element.text)
+    category_words = LanguageUtils.get_important_title_words(title_element.text, description_element.text)
     dimensions = LanguageUtils.get_dimensions(description_element.text)
     price = self.scrape_price()
     try:
@@ -51,7 +53,22 @@ class Aliexpress(Driver):
       # investigate more later. Sometimes boxes will appear asking where to ship from.
       shipping_price = 0.0
       shipping_price_10_units = 0.0
-    self.item.new(title_words=title_words, dimensions=dimensions, price=price, shipping_price=shipping_price, shipping_price_10_units=shipping_price_10_units)
+
+    # Find or create the category if it doesn't exist
+    # then create the item and assign it the category
+    category = self.category.find_or_create(
+      category_words=category_words
+    )
+
+    self.item.new(
+      title=title_element.text,
+      category_id=category.id, 
+      dimensions=dimensions, 
+      price=price, 
+      shipping_price=shipping_price, 
+      shipping_price_10_units=shipping_price_10_units,
+      url=self.driver.current_url
+    )
 
   def scrape_price(self):
     price_element = None
