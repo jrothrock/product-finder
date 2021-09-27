@@ -46,6 +46,7 @@ PyDispatcher==2.0.5
 Pygments==2.10.0
 pyOpenSSL==20.0.1
 queuelib==1.6.2
+redis==3.5.3
 regex==2021.8.28
 requests==2.26.0
 selenium==3.141.0
