@@ -2,7 +2,7 @@ from utils.database import Category as CategoryDB
 from utils.database import Database as db
 from IPython import embed
 from sqlalchemy.orm.exc import NoResultFound
-
+import redis
 class Category(db):
 
   def __init__(self):
@@ -23,6 +23,7 @@ class Category(db):
     self.session.add(new_category)
     self.session.commit()
     self.session.refresh(new_category)
+    self.add_to_redis_queue(new_category)
     return new_category
   
   def create_title(self, values):
@@ -32,3 +33,6 @@ class Category(db):
     else:
       values.sort()
       return '_'.join(values)
+
+  def add_to_redis_queue(self, new_category):
+    redis.Redis().lpush("queue:category", new_category.id)

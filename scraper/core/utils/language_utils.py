@@ -41,5 +41,31 @@ class LanguageUtils(object):
       height = float(0 if dimensions_regex.group(3) is None else dimensions_regex.group(3))
       measurement = dimensions_regex.group(4)
       return {"length": length, "width": width, "height": height, "measurement": measurement}
+  
+  @staticmethod
+  def get_weight_or_material(description):
+    weight_regex = re.search('(Weight|weight).*?(([0-9\.]+).*?(kg|g|lb))*', description, re.IGNORECASE)
+    if weight_regex:
+      weight = None if weight_regex.group(3) is None else float(weight_regex.group(3))
+      measurement = weight_regex.group(4)
+      return {"weight": weight, "measurement": measurement, "material": None}
+    
+    material_regex = re.search('.*(wood|steel|plastic|fabric)*', description, re.IGNORECASE)
+    if material_regex:
+      return {"weight": None, "measurement": None, "material": material_regex.group(1)} # may need to search for most common grouping, but works for now
 
+    return {"weight": None, "measurement": None, "material": None} 
+  
+  def get_unit_discounts(text):
+    discounts_regex = re.search('.*?([0-9]+)(%)?.*\(([0-9]+) (pieces|lots).*', text, re.IGNORECASE)
+    if discounts_regex:
+      discount = 0.0 if discounts_regex.group(2) != "%" and discounts_regex.group(1) == None else (float(discounts_regex.group(1)) / 100)
+      discount_amount = 0 if discounts_regex.group(3) == None else int(discounts_regex.group(3))
+      return {"discount": discount, "discount_amount": discount_amount}
 
+  def get_units_available(text):
+    available_regex = re.search('.*?([0-9]+).*', text, re.IGNORECASE)
+    if available_regex:
+      return int(available_regex.group(1))
+    else:
+      return 0
