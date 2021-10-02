@@ -1,11 +1,14 @@
-from drivers import *
-from IPython import embed
-from utils.language_utils import LanguageUtils
-from utils.database import *
-from category import Category as CategoryModel
-from item import Item as ItemModel
 import re
-import time 
+import time
+
+from scraper.core.drivers import Driver, WebDriverWait, EC, By
+from scraper.core.category import Category as CategoryModel
+from scraper.core.item import Item as ItemModel
+from scraper.core.utils.language_utils import LanguageUtils
+
+from database.db import Database, Item as ItemDB, Category as CategoryDB
+
+from IPython import embed
 class Aliexpress(Driver):
   def __init__(self):
     super().__init__()
@@ -32,8 +35,8 @@ class Aliexpress(Driver):
 
       if pages >= 3:
         # embed()
-        # Database().session.query(Item, Category).join(Category).first()
-        # Database().session.query(Item, Category).join(Category).first().Item.__dict__
+        # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first()
+        # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first().Item.__dict__
         break
       self.driver.find_element_by_class_name('next-next').click()
 
@@ -114,6 +117,3 @@ class Aliexpress(Driver):
       price_regex = re.search('.(\d+\.\d+).*', shipping_price_element.text, re.IGNORECASE)
       if price_regex:
         return float(price_regex.group(1))
-
-if __name__ == "__main__":
-  Aliexpress()

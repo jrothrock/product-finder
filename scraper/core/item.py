@@ -1,8 +1,9 @@
-from utils.database import Item as ItemDB
-from utils.database import Database as db
-from IPython import embed
+from redis import Redis
 from sqlalchemy.orm.exc import NoResultFound
-import redis
+
+from database.db import Item as ItemDB, Database as db
+
+from IPython import embed
 class Item(db):
   # convert to inches
   UNIT_CONVERSION_DIMENSIONS = {
@@ -100,4 +101,4 @@ class Item(db):
 
   def add_to_redis_queue(self, new_item):
     if new_item.length != 0 and new_item.width != 0 and new_item.height != 0 and new_item.weight != 0:
-      redis.Redis().lpush("queue:item", new_item.id)
+      Redis().lpush("queue:item", new_item.id)

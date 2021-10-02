@@ -1,11 +1,14 @@
-from drivers import *
-from IPython import embed
-from utils.language_utils import LanguageUtils
-from item import Item
-from category import Category
-from utils.database import *
 import redis
 import time 
+
+from scraper.core.drivers import Driver, WebDriverWait, EC, By
+from scraper.core.category import Category as CategoryModel
+from scraper.core.item import Item as ItemModel
+from scraper.core.utils.language_utils import LanguageUtils
+
+from database.db import Database, Item as ItemDB, Category as CategoryDB
+
+from IPython import embed
 
 class AmazonItem(Driver):
   def __init__(self):
@@ -28,7 +31,7 @@ class AmazonItem(Driver):
 
   def get_amazon(self, item_id):
     time.sleep(1)
-    item = Database().session.query(Item).get(int(item_id))
+    item = Database().session.query(ItemDB).get(int(item_id))
     self.driver.get("https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index?lang=en_US")
     self.driver.find_element_by_xpath("//input[contains(@aria-labelledby, 'link_continue-announce')]").click()
     self.driver.find_element_by_id("product-length").send_keys(str(item.length))
@@ -40,7 +43,7 @@ class AmazonItem(Driver):
     self.driver.find_element_by_id("estimate-new-announce").click()
     amazon_fees = self.driver.find_element_by_id("afn-seller-proceeds").get_attribute("value")
     session = Database().session
-    session.query(Item).filter(Item.id == item.id).update({"amazon_fee": float(amazon_fees[1:])})
+    session.query(ItemDB).filter(ItemDB.id == item.id).update({"amazon_fee": float(amazon_fees[1:])})
     session.commit()
     self.driver.manage().delete_all_cookies()
     
@@ -64,7 +67,7 @@ class AmazonCategory(Driver):
       self.get_amazon(category_id)
 
   def get_amazon(self, category_id):
-    category = Database().session.query(Category).get(int(category_id))
+    category = Database().session.query(CategoryDB).get(int(category_id))
     kew_words = category.title.split("_")
 
 if __name__ == "__main__":

@@ -2,3 +2,4 @@
 *.log
 env
 *.sqlite
+.DS_STORE

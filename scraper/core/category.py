@@ -1,8 +1,9 @@
-from utils.database import Category as CategoryDB
-from utils.database import Database as db
-from IPython import embed
+from redis import Redis
 from sqlalchemy.orm.exc import NoResultFound
-import redis
+
+from database.db import Category as CategoryDB, Database as db
+
+from IPython import embed
 class Category(db):
 
   def __init__(self):
@@ -35,4 +36,4 @@ class Category(db):
       return '_'.join(values)
 
   def add_to_redis_queue(self, new_category):
-    redis.Redis().lpush("queue:category", new_category.id)
+    Redis().lpush("queue:category", new_category.id)
