@@ -45,7 +45,7 @@ class Category:
 class Database:
   def __init__(self):
     self.db = db
-    self.engine = db.create_engine('sqlite:///database/test.sqlite')
+    self.engine = db.create_engine('sqlite:///database/test.sqlite', connect_args={'check_same_thread': False})
     Base = mapper_registry.generate_base()
     Base.metadata.create_all(self.engine, Base.metadata.tables.values(),checkfirst=True)
     self.connection = self.engine.connect()

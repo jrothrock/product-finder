@@ -32,20 +32,24 @@ class AmazonItem(Driver):
   def get_amazon(self, item_id):
     time.sleep(1)
     item = Database().session.query(ItemDB).get(int(item_id))
+    self.driver.manage().delete_all_cookies()
     self.driver.get("https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index?lang=en_US")
+    time.sleep(1)
     self.driver.find_element_by_xpath("//input[contains(@aria-labelledby, 'link_continue-announce')]").click()
-    self.driver.find_element_by_id("product-length").send_keys(str(item.length))
-    self.driver.find_element_by_id("product-width").send_keys(str(item.width))
-    self.driver.find_element_by_id("product-height").send_keys(str(item.height))
-    self.driver.find_element_by_id("product-weight").send_keys(str(item.weight))
+    self.driver.find_element_by_id("product-length").send_keys(str(round(item.length, 2)))
+    self.driver.find_element_by_id("product-width").send_keys(str(round(item.width, 2)))
+    self.driver.find_element_by_id("product-height").send_keys(str(round(item.height, 2)))
+    self.driver.find_element_by_id("product-weight").send_keys(str(round(item.weight, 2)))
     self.driver.find_element_by_xpath("//span[contains(text(), 'Select category')]").click()
     self.driver.find_element_by_xpath("//a[contains(text(), '"+item.amazon_category+"')]").click()
     self.driver.find_element_by_id("estimate-new-announce").click()
+    self.driver.execute_script('window.scrollTo(0,document.body.scrollHeight - 250);')
+    time.sleep(1)
     amazon_fees = self.driver.find_element_by_id("afn-seller-proceeds").get_attribute("value")
     session = Database().session
     session.query(ItemDB).filter(ItemDB.id == item.id).update({"amazon_fee": float(amazon_fees[1:])})
     session.commit()
-    self.driver.manage().delete_all_cookies()
+    session.close()
     
   
 class AmazonCategory(Driver):
@@ -69,6 +73,3 @@ class AmazonCategory(Driver):
   def get_amazon(self, category_id):
     category = Database().session.query(CategoryDB).get(int(category_id))
     kew_words = category.title.split("_")
-
-if __name__ == "__main__":
-  AmazonItem()

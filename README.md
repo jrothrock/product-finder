@@ -36,3 +36,5 @@ Additionally, with the two above, shipping will have to be calculated either thr
 
 This is curently done for Amazon using the FBA page:
 https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index
+
+Check implications of using `check_same_thread=true` which fixed the sqlalchemy thread error.

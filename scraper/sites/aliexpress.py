@@ -33,7 +33,7 @@ class Aliexpress(Driver):
       self.driver.execute_script('window.scrollTo(0,document.body.scrollHeight - 1750);')
       pages += 1
 
-      if pages >= 3:
+      if pages >= 1:
         # embed()
         # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first()
         # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first().Item.__dict__

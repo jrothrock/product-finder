@@ -16,9 +16,6 @@ class LanguageUtils(object):
 
   @staticmethod
   def get_high_frequency_nouns(text):
-    nltk.download('stopwords')
-    nltk.download('punkt')
-    nltk.download('averaged_perceptron_tagger')
     stop_words = set(nltk.corpus.stopwords.words('english'))
     word_tokens = nltk.word_tokenize(text)
     filtered_sentence = []
@@ -56,6 +53,7 @@ class LanguageUtils(object):
 
     return {"weight": None, "measurement": None, "material": None} 
   
+  @staticmethod
   def get_unit_discounts(text):
     discounts_regex = re.search('.*?([0-9]+)(%)?.*\(([0-9]+) (pieces|lots).*', text, re.IGNORECASE)
     if discounts_regex:
@@ -63,6 +61,7 @@ class LanguageUtils(object):
       discount_amount = 0 if discounts_regex.group(3) == None else int(discounts_regex.group(3))
       return {"discount": discount, "discount_amount": discount_amount}
 
+  @staticmethod
   def get_units_available(text):
     available_regex = re.search('.*?([0-9]+).*', text, re.IGNORECASE)
     if available_regex:
