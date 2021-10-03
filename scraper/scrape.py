@@ -8,6 +8,6 @@ def scrape_amazon_fees():
   AmazonItem()
 
 def run():
-  # scrape_items()
+  scrape_items()
   scrape_amazon_fees()
   

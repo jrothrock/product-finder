@@ -32,7 +32,6 @@ class AmazonItem(Driver):
   def get_amazon(self, item_id):
     time.sleep(1)
     item = Database().session.query(ItemDB).get(int(item_id))
-    self.driver.manage().delete_all_cookies()
     self.driver.get("https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index?lang=en_US")
     time.sleep(1)
     self.driver.find_element_by_xpath("//input[contains(@aria-labelledby, 'link_continue-announce')]").click()
@@ -50,6 +49,11 @@ class AmazonItem(Driver):
     session.query(ItemDB).filter(ItemDB.id == item.id).update({"amazon_fee": float(amazon_fees[1:])})
     session.commit()
     session.close()
+    self.driver.manage().delete_all_cookies()
+
+  def __del__ (self, *exc):
+    if self.driver:
+      self.driver.quit()
     
   
 class AmazonCategory(Driver):
@@ -73,3 +77,7 @@ class AmazonCategory(Driver):
   def get_amazon(self, category_id):
     category = Database().session.query(CategoryDB).get(int(category_id))
     kew_words = category.title.split("_")
+
+  def __del__ (self, *exc):
+    if self.driver:
+      self.driver.quit()

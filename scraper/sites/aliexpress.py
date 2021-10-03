@@ -117,3 +117,7 @@ class Aliexpress(Driver):
       price_regex = re.search('.(\d+\.\d+).*', shipping_price_element.text, re.IGNORECASE)
       if price_regex:
         return float(price_regex.group(1))
+
+  def __del__ (self, *exc):
+    if self.driver:
+      self.driver.quit()
