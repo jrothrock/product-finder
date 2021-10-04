@@ -26,6 +26,8 @@ Returns
 
 Incorporate other selling modes such as Ebay or Shopify
 
+Work on items dimensions regex. I think I may have some disconnect between what python actual does and what regex101 shows
+May want to to put threads into Flask's `g` variable, as well as keeping the state it is in (running, finished, etc.)
 ## Issues. 
 
 Ebay only allows a few items to be sold (may require membership or a few sales, can't remember)

@@ -33,11 +33,12 @@ class Aliexpress(Driver):
       self.driver.execute_script('window.scrollTo(0,document.body.scrollHeight - 1750);')
       pages += 1
 
-      if pages >= 1:
+      if pages >= 3:
         # embed()
         # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first()
         # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first().Item.__dict__
         break
+      time.sleep(1)
       self.driver.find_element_by_class_name('next-next').click()
 
 
@@ -50,11 +51,13 @@ class Aliexpress(Driver):
     description_element = self.driver.find_element_by_id('product-description')
     title_element = self.driver.find_element_by_class_name('product-title-text')
     quantity_element = self.driver.find_element_by_class_name('product-quantity-tip')
+    image_element = self.driver.find_element_by_class_name('magnifier-image')
 
     category_words = LanguageUtils.get_important_title_words(title_element.text, description_element.text)
     dimensions = LanguageUtils.get_dimensions(description_element.text)
     weight_or_material = LanguageUtils.get_weight_or_material(description_element.text)
     quantity =  LanguageUtils.get_units_available(quantity_element.text)
+    image_url = image_element.get_attribute("src")
     price = self.scrape_price()
   
     try:
@@ -88,7 +91,8 @@ class Aliexpress(Driver):
       weight_or_material=weight_or_material,
       unit_discounts=unit_discounts,
       quantity=quantity,
-      amazon_category=amazon_category
+      amazon_category=amazon_category,
+      image_url=image_url
     )
 
   def scrape_price(self):
@@ -117,7 +121,3 @@ class Aliexpress(Driver):
       price_regex = re.search('.(\d+\.\d+).*', shipping_price_element.text, re.IGNORECASE)
       if price_regex:
         return float(price_regex.group(1))
-
-  def __del__ (self, *exc):
-    if self.driver:
-      self.driver.quit()

@@ -2,33 +2,93 @@
 <link href="https://unpkg.com/tabulator-tables@4.9.3/dist/css/tabulator.min.css" rel="stylesheet">
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.min.js"></script>
 <title>Item Finder</title>
-<div id="example-table"></div>
+
+<div style='display: flex; flex-wrap: wrap;'>
+  <div style='margin: 5px'>
+    <a href="/">Index</a>
+  </div>
+  <div style='margin: 5px'>
+    <a href="/categories">Categories</a>
+  </div>
+</div>
+
+<div style='display: flex; flex-wrap: wrap;'>
+  <div style='margin: 10px'>
+    <p>Item Count: {{item_count}}</p>
+  </div>
+  <div style='margin: 10px'>
+    <p>Category Count: {{category_count}}</p>
+  </div>
+</div>
+
+<div style='display: flex; flex-wrap: wrap;'>
+  <div style='margin: 10px'>
+    <button class='scrape-button' id='scape-all' data-url='/scrape/all'>Scrape All</button>
+  </div>
+  <div style='margin: 10px'>
+    <button class='scrape-button' id='scape-aliexpress' data-url='/scrape/aliexpress'>Scrape AliExpress</button>
+  </div>
+  <div style='margin: 10px'>
+    <button class='scrape-button' id='scrape-amazon-fees' data-url='/scrape/amazon/fees'>Scrape Amazon Fees</button>
+  </div>
+  <div style='margin: 10px'>
+    <button class='scrape-button' id='scrape-categories'>Scrape Categories</button>
+  </div>
+</div>
+
+<div id="items-table"></div>
 
 
 <script type="text/javascript">
   records = [
     {% for record in records %}
-      {item_title: "{{record.Item.title}}", amazon_category: "{{record.Category.amazon_category}}", category: "{{record.Category.title}}", price: {{record.Item.price}}, shipping_price: {{record.Item.shipping_price}}, shipping_price_10_units: {{record.Item.shipping_price_10_units}}, dimensions: "w: {{record.Item.width}}, l: {{record.Item.length}}, h: {{record.Item.height}}", weight: {{record.Item.weight}}, amazon_fee: {{record.Item.amazon_fee}}}, 
+      { 
+        item_image: "{{record.Item.image_url}}",
+        item_title: "{{record.Item.title}}", 
+        item_url: "{{record.Item.url}}",
+        amazon_category: "{{record.Item.amazon_category}}", 
+        category: "{{record.Category.title}}", 
+        price: {{record.Item.price}}, 
+        available: {{record.Item.available_quantity}},
+        shipping_price: {{record.Item.shipping_price}}, 
+        shipping_price_10_units: {{record.Item.shipping_price_10_units}}, 
+        dimensions: "w: {{record.Item.width}}, l: {{record.Item.length}}, h: {{record.Item.height}}", 
+        weight: {{record.Item.weight}}, 
+        amazon_fee: {{record.Item.amazon_fee}}
+      }, 
     {% endfor %}
   ];
 
-  var table = new Tabulator("#example-table", {
-    // height:205, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+  var table = new Tabulator("#items-table", {
     data:records, //assign data to table
     layout:"fitColumns", //fit columns to width of table (optional)
     columns:[ //Define Table Columns
-      {title:"Item", field:"item_title", width:200},
-      {title:"Category", field:"category", hozAlign:"left"},
+      {title: "", field:"item_image",formatter:"image", formatterParams:{height:"50px", width:"50px"}},
+      {title:"Item", headerFilter:"input", field:"item_title", width:200, formatter:"link", formatterParams:{labelField:"item_title", urlField:"item_url", target:"_blank"}},
+      {title:"Category", headerFilter:"input", field:"category", hozAlign:"left"},
       {title:"Amazon Category", field:"amazon_category", hozAlign:"left"},
       {title:"Price", field:"price", hozAlign:"left"},
+      {title:"Available", field:"available", hozAlign:"left"},
       {title:"Shipping Price", field:"shipping_price", hozAlign:"left"},
       {title:"Shipping Price 10 units", field:"shipping_price_10_units", hozAlign:"left"},
       {title:"Dimensions", field:"dimensions", hozAlign:"left"},
       {title:"Weight", field:"weight", hozAlign:"left"},
       {title:"Amazon Fee", field:"amazon_fee", hozAlign:"left"}
-    ],
-    rowClick:function(e, row){ //trigger an alert message when the row is clicked
-      alert("Row " + row.getData().id + " Clicked!!!!");
-    },
+    ]
   });
+
+  var clickElements = document.getElementsByClassName("scrape-button");
+  for (var i = 0; i < clickElements.length; i++) { 
+    clickElements[i].addEventListener('click', function (event) { 
+      
+      if(!event.target.dataset.url) return;
+      
+      fetch(event.target.dataset.url, {
+        method: "POST",
+      }).then(res => {
+        console.log("Request complete! response:", res);
+      });
+    })
+  }
+
 </script>

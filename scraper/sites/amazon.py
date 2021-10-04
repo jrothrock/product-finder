@@ -17,17 +17,17 @@ class AmazonItem(Driver):
     self.check_items()
   
   def check_items(self):
-    try:
       # May run into race conditions, may need a transaction later
       item_ids = self.redis.lrange("queue:item", 0, -1)
       self.redis.delete("queue:item")
       self.process_items(item_ids)
-    except:
-      pass
 
   def process_items(self, item_ids):
     for item_id in item_ids:
-      self.get_amazon(item_id)
+      try:
+        self.get_amazon(item_id)
+      except:
+        pass
 
   def get_amazon(self, item_id):
     time.sleep(1)
@@ -49,12 +49,8 @@ class AmazonItem(Driver):
     session.query(ItemDB).filter(ItemDB.id == item.id).update({"amazon_fee": float(amazon_fees[1:])})
     session.commit()
     session.close()
-    self.driver.manage().delete_all_cookies()
+    self.driver.delete_all_cookies()
 
-  def __del__ (self, *exc):
-    if self.driver:
-      self.driver.quit()
-    
   
 class AmazonCategory(Driver):
   def __init__(self):
@@ -77,7 +73,3 @@ class AmazonCategory(Driver):
   def get_amazon(self, category_id):
     category = Database().session.query(CategoryDB).get(int(category_id))
     kew_words = category.title.split("_")
-
-  def __del__ (self, *exc):
-    if self.driver:
-      self.driver.quit()

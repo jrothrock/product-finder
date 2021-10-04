@@ -25,6 +25,7 @@ class Item(db):
     "plastic": 0.05,
     "steel": 0.29,
     "fabric": 0.06,
+    "polyester": 0.05
   }
 
   def __init__(self):
@@ -53,6 +54,7 @@ class Item(db):
       height=dimensions_in_inches["height"],
       weight=weight,
       url=kwargs["url"],
+      image_url=kwargs["image_url"],
       category_id=kwargs["category_id"],
       amazon_category=amazon_category,
       available_quantity=kwargs["quantity"],
@@ -70,7 +72,7 @@ class Item(db):
   # Need to save dimensions as inches
   def dimensions(self,values):
     # TODO investigate better regex to pull measurements
-    if values == None or values["measurement"] == None:
+    if values == None or values["measurement"] == None or values["measurement"] == "":
       return {"length": 0, "width": 0, "height": 0}
 
     divisor = self.UNIT_CONVERSION_DIMENSIONS[values["measurement"].lower()]

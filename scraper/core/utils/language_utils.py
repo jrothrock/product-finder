@@ -1,6 +1,6 @@
 import nltk
 import re
-from textblob import TextBlob
+
 from IPython import embed
 
 class LanguageUtils(object):
@@ -31,23 +31,24 @@ class LanguageUtils(object):
 
   @staticmethod
   def get_dimensions(description):
-    dimensions_regex = re.search('.([\d\.]+)\s?[(\*|x|X)]\s?([\d\.]+)\s?[(\*|x|X)]?\s?([\d\.]+)?\s?([cm|in|mm]+)*', description, re.IGNORECASE)
+    dimensions_regex = re.search('([\d]+\.?[\d]?[\d]?)\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)', description, re.IGNORECASE)
     if dimensions_regex:
       length = float(dimensions_regex.group(1))
-      width = float(dimensions_regex.group(2))
-      height = float(0 if dimensions_regex.group(3) is None else dimensions_regex.group(3))
-      measurement = dimensions_regex.group(4)
+      width = float(0 if dimensions_regex.group(4) is None else dimensions_regex.group(4))
+      height = float(1 if dimensions_regex.group(7) is None else dimensions_regex.group(7))
+      measurement_options = [dimensions_regex.group(2), dimensions_regex.group(5), dimensions_regex.group(8), ""]
+      measurement = next(match for match in measurement_options if match is not None)
       return {"length": length, "width": width, "height": height, "measurement": measurement}
   
   @staticmethod
   def get_weight_or_material(description):
-    weight_regex = re.search('(Weight|weight).*?(([0-9\.]+).*?(kg|g|lb))*', description, re.IGNORECASE)
+    weight_regex = re.search('(Weight|weight).+?([\d]+[\.]?[\d]?[\d]?)\s?(kg|g|lb)', description, re.IGNORECASE)
     if weight_regex:
-      weight = None if weight_regex.group(3) is None else float(weight_regex.group(3))
-      measurement = weight_regex.group(4)
+      weight = None if weight_regex.group(2) is None else float(weight_regex.group(2))
+      measurement = weight_regex.group(3)
       return {"weight": weight, "measurement": measurement, "material": None}
     
-    material_regex = re.search('.*(wood|steel|plastic|fabric)*', description, re.IGNORECASE)
+    material_regex = re.search('(wood|steel|plastic|fabric|polyester)', description, re.IGNORECASE)
     if material_regex:
       return {"weight": None, "measurement": None, "material": material_regex.group(1)} # may need to search for most common grouping, but works for now
 

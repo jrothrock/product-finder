@@ -11,6 +11,6 @@ class Driver(object):
     self.caps["pageLoadStrategy"] = "eager" # don't freeze on 3rd party scripts taking awhile to load
     self.driver = webdriver.Firefox(desired_capabilities=self.caps, executable_path=GeckoDriverManager().install())
 
-  def __exit__ (self, *exc):
+  def __del__ (self, *exc):
     if self.driver:
       self.driver.quit()
