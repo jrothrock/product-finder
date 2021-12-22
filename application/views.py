@@ -42,3 +42,7 @@ def api_scrape_amazon_fees():
   scraper.start()
   return jsonify(success=True)
   
+def api_scrape_amazon_categories():
+  scraper = threading.Thread(target=scrape.scrape_amazon_categories())
+  scraper.start()
+  return jsonify(success=True)

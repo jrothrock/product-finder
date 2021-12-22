@@ -34,16 +34,14 @@ class Item:
 @mapper_registry.mapped
 class Category:
     __tablename__ = 'category'
-
     id = Column(Integer, primary_key=True)
     title = Column(String)
     amazon_min_price = Column(Float, default=0.0)
     amazon_max_price = Column(Float, default=0.0)
     amazon_total_results = Column(Integer, default=0)
-    amazon_max_ratings = Column(Float, default=0.0)
-    amazon_min_ratings = Column(Float, default=0.0)
-    amazon_average_ratings = Column(Float, default=0.0)
-
+    amazon_max_rating = Column(Float, default=0.0)
+    amazon_min_rating = Column(Float, default=0.0)
+    number_of_shopify_sites = Column(Integer, default=0)
 class Database:
   def __init__(self):
     self.db = db

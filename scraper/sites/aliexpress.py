@@ -24,7 +24,7 @@ class Aliexpress(Driver):
     while True:
       current_url = self.driver.current_url
       self.driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-      url_elements = self.driver.find_elements(By.CLASS_NAME, 'awV9E')
+      url_elements = self.driver.find_elements(By.CLASS_NAME, '_3KNwG')
       urls = [url_elem.get_attribute("href") for url_elem in url_elements]
       for link in urls:
         self.scrape_page(link, amazon_category)

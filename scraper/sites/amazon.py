@@ -17,7 +17,6 @@ class AmazonItem(Driver):
     self.check_items()
   
   def check_items(self):
-      # May run into race conditions, may need a transaction later
       item_ids = self.redis.lrange("queue:item", 0, -1)
       self.redis.delete("queue:item")
       self.process_items(item_ids)
@@ -55,21 +54,42 @@ class AmazonItem(Driver):
 class AmazonCategory(Driver):
   def __init__(self):
     super().__init__()
+    self.redis = redis.Redis()
     self.check_categories()
 
   def check_categories(self):
-    try:
-      # May run into race conditions, may need a transaction later
-      category_ids = self.redis.lrange("queue:category", 0, -1)
-      self.redis.delete("queue:category")
-      self.process_categories(category_ids)
-    except:
-      pass
+    category_ids = self.redis.lrange("queue:category", 0, -1)
+    self.redis.delete("queue:category")
+    self.process_categories(category_ids)
 
   def process_categories(self, category_ids):
     for category_id in category_ids:
-      self.get_amazon(category_id)
+      try:
+        self.get_amazon(category_id)
+      except:
+        pass
 
   def get_amazon(self, category_id):
+    time.sleep(1)
     category = Database().session.query(CategoryDB).get(int(category_id))
-    kew_words = category.title.split("_")
+    key_words = category.title.split("_")
+    self.driver.get("https://www.amazon.com/s?k=" + "+".join(key_words) + "&ref=nb_sb_noss")
+    time.sleep(1)
+    number_of_products_elem = self.driver.find_element_by_xpath("//div[contains(@class, 's-breadcrumb']//div[contains(@class, 'a-spacing-top-small')]/*[1]").text
+    amazon_total_results = self.get_number_of_products(number_of_products_elem.text)
+    prices = map(lambda price_elem: float(price_elem.text), self.driver.find_elements_by_class_name("a-offscreen"))
+    ratings = map(lambda rating_elem: self.get_review_from_text(rating_elem.text), self.driver.find_elements_by_class_name("a-icon-alt"))
+    amazon_min_price = prices.min
+    amazon_max_price = prices.max
+    amazon_min_rating = ratings.min
+    amazon_max_rating = ratings.max
+    session = Database().session
+    session.query(CategoryDB).filter(CategoryDB.id == category.id).update({"amazon_total_results": int(amazon_total_results), "amazon_min_price": amazon_min_price, "amazon_max_price": amazon_max_price, "amazon_min_rating": amazon_min_rating, "amazon_max_rating": amazon_max_rating })
+    self.redis.lpush("queue:item_calculator", category.id)
+
+  def get_number_of_products(self, number_of_products_text):
+    pass
+
+  def get_review_from_text(self, review_text):
+    pass
+

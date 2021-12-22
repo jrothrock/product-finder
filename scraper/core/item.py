@@ -33,7 +33,7 @@ class Item(db):
 
   def find_or_create(self, **kwargs):
     try:
-      item = self.session.query(ItemDB).filter_by(title=kwargs["title"]).one() # filter on name
+      item = self.session.query(ItemDB).filter_by(title=kwargs.get("title", "")).one() # filter on name
     except NoResultFound:
       item = self.new(**kwargs)
     
@@ -58,8 +58,8 @@ class Item(db):
       category_id=kwargs["category_id"],
       amazon_category=amazon_category,
       available_quantity=kwargs["quantity"],
-      unit_discount_percentage=kwargs["unit_discounts"]["discount"],
-      unit_discount_minimum_volume=kwargs["unit_discounts"]["discount_amount"]
+      unit_discount_percentage=kwargs.get("unit_discounts", {}).get("discount", None),
+      unit_discount_minimum_volume=kwargs.get("unit_discounts", {}).get("unit_discounts", None)
     )
 
     self.session.add(new_item)
