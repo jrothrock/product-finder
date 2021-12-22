@@ -1,14 +1,25 @@
 import sqlalchemy as db
-from sqlalchemy import func, Column, create_engine, MetaData, Float, String, ForeignKey, Integer, Boolean
+from sqlalchemy import (
+    func,
+    Column,
+    create_engine,
+    MetaData,
+    Float,
+    String,
+    ForeignKey,
+    Integer,
+    Boolean,
+)
 from sqlalchemy.orm import registry, sessionmaker
 
 from IPython import embed
 
 mapper_registry = registry()
 
+
 @mapper_registry.mapped
 class Item:
-    __tablename__ = 'item'
+    __tablename__ = "item"
 
     id = Column(Integer, primary_key=True)
     category_id = Column(ForeignKey("category.id"))
@@ -31,9 +42,10 @@ class Item:
     image_url = Column(String)
     item_processed = Column(Boolean, default=False)
 
+
 @mapper_registry.mapped
 class Category:
-    __tablename__ = 'category'
+    __tablename__ = "category"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     amazon_min_price = Column(Float, default=0.0)
@@ -42,13 +54,19 @@ class Category:
     amazon_max_rating = Column(Float, default=0.0)
     amazon_min_rating = Column(Float, default=0.0)
     number_of_shopify_sites = Column(Integer, default=0)
+
+
 class Database:
-  def __init__(self):
-    self.db = db
-    self.engine = create_engine('sqlite:///database/test.sqlite', connect_args={'check_same_thread': False})
-    Base = mapper_registry.generate_base()
-    Base.metadata.create_all(self.engine, Base.metadata.tables.values(),checkfirst=True)
-    self.connection = self.engine.connect()
-    self.metadata = MetaData()
-    Session = sessionmaker(bind=self.engine)
-    self.session = Session()
+    def __init__(self):
+        self.db = db
+        self.engine = create_engine(
+            "sqlite:///database/test.sqlite", connect_args={"check_same_thread": False}
+        )
+        Base = mapper_registry.generate_base()
+        Base.metadata.create_all(
+            self.engine, Base.metadata.tables.values(), checkfirst=True
+        )
+        self.connection = self.engine.connect()
+        self.metadata = MetaData()
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()

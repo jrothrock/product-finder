@@ -1,10 +1,13 @@
 import application.app as app
 
+
 def run_application():
-  app.start()
+    app.start()
+
 
 def main():
-  run_application()
+    run_application()
+
 
 if __name__ == "__main__":
-  main()
+    main()
