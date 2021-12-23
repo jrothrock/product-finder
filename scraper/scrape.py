@@ -3,20 +3,18 @@ from scraper.sites.amazon import AmazonItem, AmazonCategory
 
 
 def scrape_aliexpress():
-    Aliexpress()
+    Aliexpress.run()
 
 
 def scrape_amazon_fees():
-    AmazonItem()
+    AmazonItem.run()
 
 
 def scrape_amazon_categories():
-    AmazonCategory()
+    AmazonCategory.run()
 
 
 def scrape_all():
     scrape_aliexpress()
     scrape_amazon_fees()
-    scrape_amazon_categories()
-
     scrape_amazon_categories()

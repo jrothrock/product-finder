@@ -17,19 +17,19 @@ class AmazonItem(Driver):
         self.redis = redis.Redis()
         self.check_items()
 
-    def check_items(self):
+    def _check_items(self):
         item_ids = self.redis.lrange("queue:item", 0, -1)
         self.redis.delete("queue:item")
-        self.process_items(item_ids)
+        self._process_items(item_ids)
 
-    def process_items(self, item_ids):
+    def _process_items(self, item_ids):
         for item_id in item_ids:
             try:
-                self.get_amazon(item_id)
+                self._get_amazon(item_id)
             except:
                 pass
 
-    def get_amazon(self, item_id):
+    def _get_amazon(self, item_id):
         time.sleep(1)
         item = Database().session.query(ItemDB).get(int(item_id))
         self.driver.get(
@@ -73,26 +73,30 @@ class AmazonItem(Driver):
         session.close()
         self.driver.delete_all_cookies()
 
+    @classmethod
+    def run(cls):
+        cls()
+
 
 class AmazonCategory(Driver):
     def __init__(self):
         super().__init__()
         self.redis = redis.Redis()
-        self.check_categories()
+        self._check_categories()
 
-    def check_categories(self):
+    def _check_categories(self):
         category_ids = self.redis.lrange("queue:category", 0, -1)
         self.redis.delete("queue:category")
-        self.process_categories(category_ids)
+        self._process_categories(category_ids)
 
-    def process_categories(self, category_ids):
+    def _process_categories(self, category_ids):
         for category_id in category_ids:
             try:
-                self.get_amazon(category_id)
+                self._get_amazon(category_id)
             except:
                 pass
 
-    def get_amazon(self, category_id):
+    def _get_amazon(self, category_id):
         time.sleep(1)
         category = Database().session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
@@ -128,8 +132,12 @@ class AmazonCategory(Driver):
         )
         self.redis.lpush("queue:item_calculator", category.id)
 
-    def get_number_of_products(self, number_of_products_text):
+    def _get_number_of_products(self, number_of_products_text):
         pass
 
-    def get_review_from_text(self, review_text):
+    def _get_review_from_text(self, review_text):
         pass
+
+    @classmethod
+    def run(cls):
+        cls()

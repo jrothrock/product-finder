@@ -16,9 +16,9 @@ class Aliexpress(Driver):
         super().__init__()
         self.category = CategoryModel()
         self.item = ItemModel()
-        self.scrape_pages()
+        self._scrape_pages()
 
-    def scrape_pages(self):
+    def _scrape_pages(self):
         # TODO make the urls and amazon_category more dynamic
         self.driver.get(
             "https://www.aliexpress.com/category/15/home-garden.html?&SortType=create_desc"
@@ -31,7 +31,7 @@ class Aliexpress(Driver):
             url_elements = self.driver.find_elements(By.CLASS_NAME, "_3KNwG")
             urls = [url_elem.get_attribute("href") for url_elem in url_elements]
             for link in urls:
-                self.scrape_page(link, amazon_category)
+                self._scrape_page(link, amazon_category)
 
             self.driver.get(current_url)
             self.driver.execute_script(
@@ -47,7 +47,7 @@ class Aliexpress(Driver):
             time.sleep(1)
             self.driver.find_element_by_class_name("next-next").click()
 
-    def scrape_page(self, link, amazon_category):
+    def _scrape_page(self, link, amazon_category):
         time.sleep(1)
         self.driver.get(link)
         self.driver.execute_script("window.scrollTo(0,1000)")
@@ -71,11 +71,11 @@ class Aliexpress(Driver):
         )
         quantity = LanguageUtils.get_units_available(quantity_element.text)
         image_url = image_element.get_attribute("src")
-        price = self.scrape_price()
+        price = self._scrape_price()
 
         try:
-            shipping_price = self.scrape_shipping_price()
-            shipping_price_10_units = self.scrape_shipping_price(ten_units=True)
+            shipping_price = self._scrape_shipping_price()
+            shipping_price_10_units = self._scrape_shipping_price(ten_units=True)
         except:
             # investigate more later. Sometimes boxes will appear asking where to ship from.
             shipping_price = 0.0
@@ -111,7 +111,7 @@ class Aliexpress(Driver):
             image_url=image_url,
         )
 
-    def scrape_price(self):
+    def _scrape_price(self):
         price_element = None
         if len(self.driver.find_elements(By.CLASS_NAME, "product-price-value")) > 0:
             price_element = self.driver.find_element_by_class_name(
@@ -128,7 +128,7 @@ class Aliexpress(Driver):
         else:
             return -1
 
-    def scrape_shipping_price(self, ten_units=False):
+    def _scrape_shipping_price(self, ten_units=False):
         if ten_units == True:
             for _x in range(9):
                 self.driver.find_element_by_class_name(
@@ -146,3 +146,7 @@ class Aliexpress(Driver):
             )
             if price_regex:
                 return float(price_regex.group(1))
+
+    @classmethod
+    def run(cls):
+        cls()
