@@ -1,5 +1,7 @@
+.vscode/*
 *.pyc
 *.log
 env
 *.sqlite
 .DS_STORE
+dump.rdb

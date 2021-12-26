@@ -2,21 +2,31 @@ import nltk
 from application import views
 
 from flask import Flask
-from flask import render_template
 
 app = Flask(__name__)
 app.add_url_rule("/", view_func=views.index)
 app.add_url_rule("/categories", view_func=views.categories)
-app.add_url_rule("/scrape/all", view_func=views.api_scrape_all, methods=["POST"])
+app.add_url_rule("/category/<int:category_id>", view_func=views.category)
+app.add_url_rule("/api/scrape/all", view_func=views.api_scrape_all, methods=["POST"])
 app.add_url_rule(
-    "/scrape/aliexpress", view_func=views.api_scrape_aliexpress, methods=["POST"]
+    "/api/scrape/aliexpress", view_func=views.api_scrape_aliexpress, methods=["POST"]
 )
 app.add_url_rule(
-    "/scrape/amazon/fees", view_func=views.api_scrape_amazon_fees, methods=["POST"]
+    "/api/scrape/amazon/fees", view_func=views.api_scrape_amazon_fees, methods=["POST"]
 )
 app.add_url_rule(
-    "/scrape/amazon/categories",
+    "/api/scrape/amazon/categories",
     view_func=views.api_scrape_amazon_categories,
+    methods=["POST"],
+)
+app.add_url_rule(
+    "/api/scrape/shopify/categories",
+    view_func=views.api_scrape_shopify_categories,
+    methods=["POST"],
+)
+app.add_url_rule(
+    "/api/run/calculator",
+    view_func=views.api_run_calculator,
     methods=["POST"],
 )
 

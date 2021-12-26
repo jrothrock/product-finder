@@ -8,7 +8,6 @@ def run_application():
 
 def main():
     run_application()
-    scrape.scrape_amazon_categories()
 
 
 if __name__ == "__main__":

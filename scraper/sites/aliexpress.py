@@ -1,12 +1,14 @@
 import re
 import time
+import logging
 
+import selenium
+
+import utils.system as system
 from scraper.core.drivers import Driver, WebDriverWait, EC, By
 from scraper.core.category import Category as CategoryModel
 from scraper.core.item import Item as ItemModel
 from scraper.core.utils.language_utils import LanguageUtils
-
-from database.db import Database, Item as ItemDB, Category as CategoryDB
 
 from IPython import embed
 
@@ -31,7 +33,20 @@ class Aliexpress(Driver):
             url_elements = self.driver.find_elements(By.CLASS_NAME, "_3KNwG")
             urls = [url_elem.get_attribute("href") for url_elem in url_elements]
             for link in urls:
-                self._scrape_page(link, amazon_category)
+                try:
+                    self._scrape_page(link, amazon_category)
+                except KeyboardInterrupt:
+                    system.exit()
+                except selenium.common.exceptions.TimeoutException:
+                    logging.exception(
+                        "Timeout occurred on page. Items may not have been found. Passing"
+                    )
+                    pass
+                except Exception as e:
+                    logging.exception(
+                        f"Exception scraping aliexpress page: {e.__dict__}"
+                    )
+                    pass
 
             self.driver.get(current_url)
             self.driver.execute_script(
@@ -76,8 +91,13 @@ class Aliexpress(Driver):
         try:
             shipping_price = self._scrape_shipping_price()
             shipping_price_10_units = self._scrape_shipping_price(ten_units=True)
-        except:
-            # investigate more later. Sometimes boxes will appear asking where to ship from.
+        except KeyboardInterrupt:
+            system.exit()
+        except Exception as e:
+            # TODO: Sometimes boxes will appear asking where to ship from.
+            logging.exception(
+                f"Exception finding shipping and price and units: {e.__dict__}"
+            )
             shipping_price = 0.0
             shipping_price_10_units = 0.0
 

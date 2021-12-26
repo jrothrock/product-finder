@@ -24,4 +24,4 @@ class ItemCalculator:
         pass
 
     def get_items(self):
-        item_ids = self.redis.lrange("queue:item", 0, -1)
+        item_ids = self.redis.lrange("queue:item_calculator", 0, -1)

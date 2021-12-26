@@ -23,16 +23,22 @@
 
 <div style='display: flex; flex-wrap: wrap;'>
   <div style='margin: 10px'>
-    <button class='scrape-button' id='scape-all' data-url='/scrape/all'>Scrape All</button>
+    <button class='action-button' id='scape-all' data-url='/api/scrape/all'>Scrape All</button>
   </div>
   <div style='margin: 10px'>
-    <button class='scrape-button' id='scape-aliexpress' data-url='/scrape/aliexpress'>Scrape AliExpress</button>
+    <button class='action-button' id='scape-aliexpress' data-url='/api/scrape/aliexpress'>Scrape AliExpress</button>
   </div>
   <div style='margin: 10px'>
-    <button class='scrape-button' id='scrape-amazon-fees' data-url='/scrape/amazon/fees'>Scrape Amazon Fees</button>
+    <button class='action-button' id='scrape-amazon-fees' data-url='/api/scrape/amazon/fees'>Scrape Amazon Fees</button>
   </div>
   <div style='margin: 10px'>
-    <button class='scrape-button' id='scrape-categories'  data-url='/scrape/amazon/categories'>Scrape Categories</button>
+    <button class='action-button' id='scrape-categories'  data-url='/api/scrape/amazon/categories'>Scrape Categories</button>
+  </div>
+  <div style='margin: 10px'>
+    <button class='action-button' id='scrape-shopify'  data-url='/api/scrape/amazon/shopify'>Scrape Shopify</button>
+  </div>
+  <div style='margin: 10px'>
+    <button class='action-button' id='run-calculator'  data-url='/api/run/calculator/'>Run Calculator</button>
   </div>
 </div>
 
@@ -77,7 +83,7 @@
     ]
   });
 
-  var clickElements = document.getElementsByClassName("scrape-button");
+  var clickElements = document.getElementsByClassName("action-button");
   for (var i = 0; i < clickElements.length; i++) { 
     clickElements[i].addEventListener('click', function (event) { 
       

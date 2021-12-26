@@ -22,15 +22,15 @@ class Category(db):
         return category
 
     def new(self, **kwargs):
-        title = self.create_title(kwargs["category_words"])
+        title = self._create_title(kwargs["category_words"])
         new_category = CategoryDB(title=title)
         self.session.add(new_category)
         self.session.commit()
         self.session.refresh(new_category)
-        self.add_to_redis_queue(new_category)
+        self._add_to_redis_queue(new_category)
         return new_category
 
-    def create_title(self, values):
+    def _create_title(self, values):
         # TODO need to investigate why values is type None
         if values == None or len(values) == 0:
             return ""
@@ -38,5 +38,5 @@ class Category(db):
             values.sort()
             return "_".join(values)
 
-    def add_to_redis_queue(self, new_category):
+    def _add_to_redis_queue(self, new_category):
         Redis().lpush("queue:category", new_category.id)

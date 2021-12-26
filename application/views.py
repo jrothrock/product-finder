@@ -11,6 +11,7 @@ def index():
     item_count = session.query(func.count(ItemDB.id)).scalar()
     category_count = session.query(func.count(CategoryDB.id)).scalar()
     records = session.query(ItemDB, CategoryDB).join(CategoryDB).all()
+    session.close()
     return render_template(
         "index.html",
         records=records,
@@ -23,9 +24,28 @@ def categories():
     session = Database().session
     category_count = session.query(func.count(CategoryDB.id)).scalar()
     records = session.query(CategoryDB).all()
+    session.close()
     return render_template(
         "categories.html", records=records, category_count=category_count
     )
+
+
+def category(category_id):
+    session = Database().session
+    records = (
+        session.query(ItemDB, CategoryDB)
+        .join(CategoryDB)
+        .filter(CategoryDB.id == category_id)
+        .all()
+    )
+    count = (
+        session.query(ItemDB, CategoryDB)
+        .join(CategoryDB)
+        .filter(CategoryDB.id == category_id)
+        .count()
+    )
+    session.close()
+    return render_template("category.html", records=records, count=count)
 
 
 def api_scrape_all():
@@ -49,4 +69,14 @@ def api_scrape_amazon_fees():
 def api_scrape_amazon_categories():
     scraper = threading.Thread(target=scrape.scrape_amazon_categories())
     scraper.start()
+    return jsonify(success=True)
+
+
+def api_scrape_shopify_categories():
+    scraper = threading.Thread(target=scrape.scrape_shopify_categories())
+    scraper.start()
+    return jsonify(success=True)
+
+
+def api_run_calculator():
     return jsonify(success=True)
