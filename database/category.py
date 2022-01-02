@@ -23,7 +23,9 @@ class Category(db):
 
     def new(self, **kwargs):
         title = self._create_title(kwargs.get("category_words"))
-        new_category = CategoryDB(title=title, amazon_category = kwargs.get("amazon_category"))
+        new_category = CategoryDB(
+            title=title, amazon_category=kwargs.get("amazon_category")
+        )
         self.session.add(new_category)
         self.session.commit()
         self.session.refresh(new_category)

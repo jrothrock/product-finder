@@ -74,9 +74,15 @@ class Item(db):
         ):
             return {"length": 0, "width": 0, "height": 0}
 
-        length_in_inches = unit_conversions.convert_to_inches(values["length"], values["measurement"])
-        width_in_inches = unit_conversions.convert_to_inches(values["width"], values["measurement"])
-        height_in_inches = unit_conversions.convert_to_inches(values["height"], values["measurement"])
+        length_in_inches = unit_conversions.convert_to_inches(
+            values["length"], values["measurement"]
+        )
+        width_in_inches = unit_conversions.convert_to_inches(
+            values["width"], values["measurement"]
+        )
+        height_in_inches = unit_conversions.convert_to_inches(
+            values["height"], values["measurement"]
+        )
         return {
             "length": length_in_inches,
             "width": width_in_inches,
@@ -84,13 +90,12 @@ class Item(db):
         }
 
     def _weight_in_pounds(self, values):
-        if (
-            values["weight"] == None
-            or values["measurement"] == None
-        ):
+        if values["weight"] == None or values["measurement"] == None:
             return 0
-        
-        return unit_conversions.convert_to_pounds(values["weight"], values["measurement"])
+
+        return unit_conversions.convert_to_pounds(
+            values["weight"], values["measurement"]
+        )
 
     def _amazon_category(self, category):
         if category == 1:

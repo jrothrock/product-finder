@@ -81,11 +81,15 @@ class AmazonCategory(Driver):
             else None
         )
         try:
-            category_dimensions_and_weight_dict = self._get_category_dimensions_and_weight()
+            category_dimensions_and_weight_dict = (
+                self._get_category_dimensions_and_weight()
+            )
         except KeyboardInterrupt:
             system.exit()
         except Exception as e:
-            logging.exception(f"Exception getting category dimensions and weight: {e.__dict__}")
+            logging.exception(
+                f"Exception getting category dimensions and weight: {e.__dict__}"
+            )
             category_dimensions_and_weight_dict = {}
 
         session = Database().session
@@ -101,12 +105,24 @@ class AmazonCategory(Driver):
                 "amazon_deviation_rating": amazon_deviation_rating,
                 "amazon_average_rating": amazon_average_rating,
                 "amazon_average_number_of_ratings": amazon_average_number_of_ratings,
-                "amazon_average_length": category_dimensions_and_weight_dict.get("amazon_average_length", None),
-                "amazon_average_width": category_dimensions_and_weight_dict.get("average_average_width", None),
-                "amazon_average_height": category_dimensions_and_weight_dict.get("amazon_average_height", None),
-                "amazon_deviation_dimensions": category_dimensions_and_weight_dict.get("amazon_deviation_dimensions", None),
-                "amazon_average_weight": category_dimensions_and_weight_dict.get("amazon_average_weight", None),
-                "amazon_deviation_weight": category_dimensions_and_weight_dict.get("amazon_deviation_weight", None)
+                "amazon_average_length": category_dimensions_and_weight_dict.get(
+                    "amazon_average_length", None
+                ),
+                "amazon_average_width": category_dimensions_and_weight_dict.get(
+                    "average_average_width", None
+                ),
+                "amazon_average_height": category_dimensions_and_weight_dict.get(
+                    "amazon_average_height", None
+                ),
+                "amazon_deviation_dimensions": category_dimensions_and_weight_dict.get(
+                    "amazon_deviation_dimensions", None
+                ),
+                "amazon_average_weight": category_dimensions_and_weight_dict.get(
+                    "amazon_average_weight", None
+                ),
+                "amazon_deviation_weight": category_dimensions_and_weight_dict.get(
+                    "amazon_deviation_weight", None
+                ),
             }
         )
         session.commit()
@@ -135,46 +151,62 @@ class AmazonCategory(Driver):
 
     def _get_category_dimensions_and_weight(self):
         product_link_elems = self.driver.find_elements_by_xpath(
-                "//div[contains(@class, 's-result-list')]//div[contains(@class, 'a-section')]//h2/a[contains(@class, 'a-link-normal')]"
-            )
+            "//div[contains(@class, 's-result-list')]//div[contains(@class, 'a-section')]//h2/a[contains(@class, 'a-link-normal')]"
+        )
         product_links = [
             product_link_elem.get_attribute("href")
             for product_link_elem in product_link_elems
         ]
 
         return self._calculate_dimensions_and_weight(product_links)
-        
 
     def _calculate_dimensions_and_weight(self, product_links):
         category_lengths = []
         category_widths = []
         category_heights = []
         category_weights = []
-        
+
         # uses higher than 3 to eliminate sponsored products
         for product_link in product_links[4:7]:
-            product_dimensions_and_weight = self._get_amazon_product_dimensions_and_weight(product_link)
+            product_dimensions_and_weight = (
+                self._get_amazon_product_dimensions_and_weight(product_link)
+            )
             category_lengths.append(product_dimensions_and_weight.get("length", None))
             category_widths.append(product_dimensions_and_weight.get("width", None))
             category_heights.append(product_dimensions_and_weight.get("height", None))
             category_weights.append(product_dimensions_and_weight.get("weight", None))
-        
 
         category_dimensions = [
-            l * w * h 
-            for l, w, h in zip(
-                category_lengths,
-                category_widths,
-                category_heights
-            )
+            l * w * h
+            for l, w, h in zip(category_lengths, category_widths, category_heights)
         ]
-        
-        amazon_average_length = (sum(category_lengths) / len(category_lengths)) if len(category_lengths) else None
-        amazon_average_width = (sum(category_widths) / len(category_widths)) if len(category_widths) else None
-        amazon_average_height = (sum(category_heights) / len(category_heights)) if len(category_heights) else None
-        amazon_deviation_height = statistics.pstdev(category_dimensions) if len(category_dimensions) else None
-        amazon_average_weight = (sum(category_weights) / len(category_weights)) if len(category_weights) else None
-        amazon_deviation_weight = statistics.pstdev(category_weights) if len(category_dimensions) else None
+
+        amazon_average_length = (
+            (sum(category_lengths) / len(category_lengths))
+            if len(category_lengths)
+            else None
+        )
+        amazon_average_width = (
+            (sum(category_widths) / len(category_widths))
+            if len(category_widths)
+            else None
+        )
+        amazon_average_height = (
+            (sum(category_heights) / len(category_heights))
+            if len(category_heights)
+            else None
+        )
+        amazon_deviation_height = (
+            statistics.pstdev(category_dimensions) if len(category_dimensions) else None
+        )
+        amazon_average_weight = (
+            (sum(category_weights) / len(category_weights))
+            if len(category_weights)
+            else None
+        )
+        amazon_deviation_weight = (
+            statistics.pstdev(category_weights) if len(category_dimensions) else None
+        )
 
         return {
             "amazon_average_length": amazon_average_length,
@@ -182,25 +214,39 @@ class AmazonCategory(Driver):
             "amazon_average_height": amazon_average_height,
             "amazon_deviation_dimensions": amazon_deviation_height,
             "amazon_average_weight": amazon_average_weight,
-            "amazon_deviation_weight": amazon_deviation_weight
+            "amazon_deviation_weight": amazon_deviation_weight,
         }
 
     def _get_amazon_product_dimensions_and_weight(self, url):
         self.driver.get(url)
-        product_details_elem = self.driver.find_element_by_xpath("//table[contains(@id, 'productDetails_detailBullets_sections1')]")
-        dimensions = language_utils.get_dimensions(product_details_elem.get_attribute("innerHTML"))
-        weight = language_utils.get_weight(product_details_elem.get_attribute("innerHTML"))
+        product_details_elem = self.driver.find_element_by_xpath(
+            "//table[contains(@id, 'productDetails_detailBullets_sections1')]"
+        )
+        dimensions = language_utils.get_dimensions(
+            product_details_elem.get_attribute("innerHTML")
+        )
+        weight = language_utils.get_weight(
+            product_details_elem.get_attribute("innerHTML")
+        )
 
-        length_in_inches = unit_conversions.convert_to_inches(dimensions["length"], dimensions["measurement"])
-        width_in_inches = unit_conversions.convert_to_inches(dimensions["width"], dimensions["measurement"])
-        height_in_inches = unit_conversions.convert_to_inches(dimensions["height"], dimensions["measurement"])
-        weight_in_pounds = unit_conversions.convert_to_pounds(weight["weight"], weight["measurement"])
+        length_in_inches = unit_conversions.convert_to_inches(
+            dimensions["length"], dimensions["measurement"]
+        )
+        width_in_inches = unit_conversions.convert_to_inches(
+            dimensions["width"], dimensions["measurement"]
+        )
+        height_in_inches = unit_conversions.convert_to_inches(
+            dimensions["height"], dimensions["measurement"]
+        )
+        weight_in_pounds = unit_conversions.convert_to_pounds(
+            weight["weight"], weight["measurement"]
+        )
 
         return {
-            "length":length_in_inches,
+            "length": length_in_inches,
             "width": width_in_inches,
             "height": height_in_inches,
-            "weight": weight_in_pounds
+            "weight": weight_in_pounds,
         }
 
     @classmethod

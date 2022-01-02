@@ -15,7 +15,7 @@ class AmazonFee(Driver):
         self.redis = redis.Redis()
 
     def _check_categories(self):
-        category_ids = self.redis.lrange("queue:category:amazon:fees", 0, -1)    
+        category_ids = self.redis.lrange("queue:category:amazon:fees", 0, -1)
         self.redis.delete("queue:category:amazon:fees")
         self._process_record(category_ids, CategoryDB)
 
@@ -48,23 +48,37 @@ class AmazonFee(Driver):
             "//input[contains(@aria-labelledby, 'link_continue-announce')]"
         ).click()
 
-        record_length = record.length if isinstance(record, ItemDB) else record.amazon_average_length
+        record_length = (
+            record.length
+            if isinstance(record, ItemDB)
+            else record.amazon_average_length
+        )
 
         self.driver.find_element_by_id("product-length").send_keys(
             str(round(record_length, 2))
         )
 
-        record_width = record.width if isinstance(record, ItemDB) else record.amazon_average_width
+        record_width = (
+            record.width if isinstance(record, ItemDB) else record.amazon_average_width
+        )
         self.driver.find_element_by_id("product-width").send_keys(
             str(round(record_width, 2))
         )
 
-        record_height = record.height if isinstance(record, ItemDB) else record.amazon_average_height
+        record_height = (
+            record.height
+            if isinstance(record, ItemDB)
+            else record.amazon_average_height
+        )
         self.driver.find_element_by_id("product-height").send_keys(
             str(round(record_height, 2))
         )
 
-        record_weight = record.weight if isinstance(record, ItemDB) else record.amazon_average_weight
+        record_weight = (
+            record.weight
+            if isinstance(record, ItemDB)
+            else record.amazon_average_weight
+        )
         self.driver.find_element_by_id("product-weight").send_keys(
             str(round(record_weight, 2))
         )
@@ -76,7 +90,7 @@ class AmazonFee(Driver):
         self.driver.find_element_by_xpath(
             "//a[contains(text(), '" + record.amazon_category + "')]"
         ).click()
-        
+
         self.driver.find_element_by_id("estimate-new-announce").click()
 
         self.driver.execute_script(
@@ -103,7 +117,7 @@ class AmazonFee(Driver):
     @classmethod
     def run_item_fees(cls):
         cls()._check_items()
-    
+
     @classmethod
     def run_category_fees(cls):
         cls()._check_categories()

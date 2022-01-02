@@ -52,6 +52,7 @@ def category(category_id):
 def calculations():
     return render_template("calculations.html")
 
+
 def api_scrape_all():
     scraper = threading.Thread(target=scrape.scrape_all())
     scraper.start()

@@ -3,6 +3,7 @@ import re
 import nltk
 from IPython import embed
 
+
 def _get_high_frequency_nouns(text):
     stop_words = set(nltk.corpus.stopwords.words("english"))
     word_tokens = nltk.word_tokenize(text)
@@ -17,10 +18,9 @@ def _get_high_frequency_nouns(text):
 
     return [word for (word, _frequency) in freq.most_common(5)]
 
+
 def get_important_title_words(title, description):
-    high_frequency_description = _get_high_frequency_nouns(
-        description
-    )
+    high_frequency_description = _get_high_frequency_nouns(description)
     high_frequency_title = _get_high_frequency_nouns(title)
     potential_list = list(
         set(high_frequency_title).intersection(high_frequency_description)
@@ -51,15 +51,14 @@ def get_dimensions(description):
             dimensions_regex.group(8),
             "",
         ]
-        measurement = next(
-            match for match in measurement_options if match is not None
-        )
+        measurement = next(match for match in measurement_options if match is not None)
         return {
             "length": length,
             "width": width,
             "height": height,
             "measurement": measurement,
         }
+
 
 def get_weight(description):
     weight_regex = re.search(
@@ -68,9 +67,7 @@ def get_weight(description):
         re.IGNORECASE,
     )
     if weight_regex:
-        weight = (
-            None if weight_regex.group(2) is None else float(weight_regex.group(2))
-        )
+        weight = None if weight_regex.group(2) is None else float(weight_regex.group(2))
         measurement = weight_regex.group(3)
         return {"weight": weight, "measurement": measurement}
 
@@ -91,6 +88,7 @@ def get_unit_discounts(text):
             0 if discounts_regex.group(3) == None else int(discounts_regex.group(3))
         )
         return {"discount": discount, "discount_amount": discount_amount}
+
 
 def get_units_available(text):
     available_regex = re.search(".*?([0-9]+).*", text, re.IGNORECASE)

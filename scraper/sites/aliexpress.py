@@ -79,9 +79,7 @@ class Aliexpress(Driver):
             title_element.text, description_element.text
         )
         dimensions = language_utils.get_dimensions(description_element.text)
-        weight = language_utils.get_weight(
-            description_element.text
-        )
+        weight = language_utils.get_weight(description_element.text)
         quantity = language_utils.get_units_available(quantity_element.text)
         image_url = image_element.get_attribute("src")
         price = self._scrape_price()
@@ -112,7 +110,9 @@ class Aliexpress(Driver):
 
         # Find or create the category if it doesn't exist
         # then create the item and assign it the category
-        category = self.category.find_or_create(category_words=category_words, amazon_category=amazon_category)
+        category = self.category.find_or_create(
+            category_words=category_words, amazon_category=amazon_category
+        )
 
         self.item.find_or_create(
             title=title_element.text,

@@ -9,6 +9,7 @@ import utils.system as system
 from scraper.core.drivers import Driver
 from database.db import Database, Category as CategoryDB
 
+
 class ShopifyCategory(Driver):
     def __init__(self):
         super().__init__()

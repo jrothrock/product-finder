@@ -29,22 +29,20 @@ class CategoryCalculator:
         category_ids = self.redis.lrange("queue:category:calculator", 0, -1)
         self.redis.delete("queue:category:calculator")
         self._process_categories(category_ids)
-    
+
     def _process_categories(self, category_ids):
         for category_id in category_ids:
-          try:
-              self._calculate_category(category_id)
-          except KeyboardInterrupt:
-              system.exit()
-          except Exception as e:
-              logging.exception(
-                  f"Exception calculations catgory: {e.__dict__}"
-              )
-              pass
-        
+            try:
+                self._calculate_category(category_id)
+            except KeyboardInterrupt:
+                system.exit()
+            except Exception as e:
+                logging.exception(f"Exception calculations catgory: {e.__dict__}")
+                pass
+
     def _calculate_category(category_id):
         pass
-      
+
     @classmethod
     def run(cls):
         cls()._check_categories()
@@ -66,11 +64,9 @@ class ItemCalculator:
             except KeyboardInterrupt:
                 system.exit()
             except Exception as e:
-                logging.exception(
-                    f"Exception calculations item: {e.__dict__}"
-                )
+                logging.exception(f"Exception calculations item: {e.__dict__}")
                 pass
-      
+
     def _calculate_category(self, category_id):
         pass
 
@@ -80,11 +76,13 @@ class ItemCalculator:
 
 
 def calculate_categories():
-  CategoryCalculator.run()
+    CategoryCalculator.run()
+
 
 def calculate_items():
-  ItemCalculator.run()
+    ItemCalculator.run()
+
 
 def calculate_all():
-  calculate_categories()
-  calculate_items()
+    calculate_categories()
+    calculate_items()

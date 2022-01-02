@@ -70,6 +70,7 @@ class Category:
     number_of_shopify_sites = Column(Integer, default=0)
     min_retail_cost = Column(Float, default=0)
 
+
 class Database:
     def __init__(self):
         self.db = db
