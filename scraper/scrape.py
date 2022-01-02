@@ -1,5 +1,5 @@
 from scraper.sites.aliexpress import Aliexpress
-from scraper.sites.amazon.item import AmazonItem
+from scraper.sites.amazon.fees import AmazonFee
 from scraper.sites.amazon.category import AmazonCategory
 from scraper.sites.shopify import ShopifyCategory
 
@@ -9,7 +9,8 @@ def scrape_aliexpress():
 
 
 def scrape_amazon_fees():
-    AmazonItem.run()
+    AmazonFee.run_category_fees()
+    AmazonFee.run_item_fees()
 
 
 def scrape_amazon_categories():

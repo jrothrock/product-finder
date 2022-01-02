@@ -1,32 +1,18 @@
 import logging
 
-from redis import Redis
+import redis
 from sqlalchemy.orm.exc import NoResultFound
+from IPython import embed
 
 import utils.system as system
+import utils.unit_conversions as unit_conversions
 from database.db import Item as ItemDB, Database as db
-
-from IPython import embed
 
 
 class Item(db):
-    # convert to inches
-    UNIT_CONVERSION_DIMENSIONS = {"cm": 2.54, "mm": 25.4, "in": 1}
-
-    # convert to lbs
-    UNIT_CONVERSION_WEIGHT = {"g": 453.592, "kg": 0.4535, "lb": 1}
-
-    # density in lbs/in^3
-    MATERIAL_DENSITY = {
-        "wood": 0.02384,
-        "plastic": 0.05,
-        "steel": 0.29,
-        "fabric": 0.06,
-        "polyester": 0.05,
-    }
-
     def __init__(self):
         super().__init__()
+        self.redis = redis.Redis()
 
     def find_or_create(self, **kwargs):
         try:
@@ -42,7 +28,7 @@ class Item(db):
 
     def new(self, **kwargs):
         dimensions_in_inches = self._dimensions(kwargs["dimensions"])
-        weight = self._weight(dimensions_in_inches, kwargs["weight_or_material"])
+        weight = self._weight_in_pounds(kwargs["weight"])
         amazon_category = self._amazon_category(kwargs["amazon_category"])
         try:
             new_item = ItemDB(
@@ -88,45 +74,23 @@ class Item(db):
         ):
             return {"length": 0, "width": 0, "height": 0}
 
-        divisor = self.UNIT_CONVERSION_DIMENSIONS[values["measurement"].lower()]
-        length_in_inches = values["length"] / divisor
-        width_in_inches = values["width"] / divisor
-        height_in_inches = values["height"] / divisor
+        length_in_inches = unit_conversions.convert_to_inches(values["length"], values["measurement"])
+        width_in_inches = unit_conversions.convert_to_inches(values["width"], values["measurement"])
+        height_in_inches = unit_conversions.convert_to_inches(values["height"], values["measurement"])
         return {
             "length": length_in_inches,
             "width": width_in_inches,
             "height": height_in_inches,
         }
 
-    def _weight(self, dimensions, weight_or_material):
+    def _weight_in_pounds(self, values):
         if (
-            weight_or_material["weight"] != None
-            and weight_or_material["measurement"] != None
-        ):
-            return (
-                weight_or_material["weight"]
-                / self.UNIT_CONVERSION_WEIGHT[weight_or_material["measurement"].lower()]
-            )
-
-        # bail as we won't be able to calculate volume
-        if (
-            dimensions["length"] == 0
-            or dimensions["width"] == 0
-            or dimensions["height"] == 0
+            values["weight"] == None
+            or values["measurement"] == None
         ):
             return 0
-
-        # an overestimate as the product is most likely not a cube
-        volume = dimensions["length"] * dimensions["width"] * dimensions["height"]
-        # fallback to steel density if material not identified
-        density_of_item_per_cubic_inch = (
-            0.29
-            if weight_or_material["material"] == None
-            else self.MATERIAL_DENSITY[weight_or_material["material"].lower()]
-        )
-        mass = volume * density_of_item_per_cubic_inch
-        weight = mass * (9.81 * 0.4535)
-        return weight
+        
+        return unit_conversions.convert_to_pounds(values["weight"], values["measurement"])
 
     def _amazon_category(self, category):
         if category == 1:
@@ -139,4 +103,4 @@ class Item(db):
             and new_item.height != 0
             and new_item.weight != 0
         ):
-            Redis().lpush("queue:item", new_item.id)
+            self.redis.rpush("queue:item:amazon:fees", new_item.id)

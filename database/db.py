@@ -11,7 +11,6 @@ from sqlalchemy import (
     Boolean,
 )
 from sqlalchemy.orm import registry, sessionmaker
-
 from IPython import embed
 
 mapper_registry = registry()
@@ -41,6 +40,7 @@ class Item:
     url = Column(String)
     image_url = Column(String)
     item_processed = Column(Boolean, default=False)
+    break_even_sale_price = Column(Float, default=False)
 
 
 @mapper_registry.mapped
@@ -49,16 +49,26 @@ class Category:
 
     id = Column(Integer, primary_key=True)
     title = Column(String)
+    amazon_category = Column(String)
     amazon_min_price = Column(Float, default=0.0)
     amazon_max_price = Column(Float, default=0.0)
     amazon_average_price = Column(Float, default=0.0)
+    amazon_deviation_price = Column(Float, default=0.0)
     amazon_total_results = Column(Integer, default=0)
     amazon_max_rating = Column(Float, default=0.0)
     amazon_min_rating = Column(Float, default=0.0)
+    amazon_deviation_rating = Column(Float, default=0.0)
     amazon_average_rating = Column(Float, default=0.0)
     amazon_average_number_of_ratings = Column(Float, default=0.0)
+    amazon_average_length = Column(Float, default=0.0)
+    amazon_average_width = Column(Float, default=0.0)
+    amazon_average_height = Column(Float, default=0.0)
+    amazon_deviation_dimensions = Column(Float, default=0.0)
+    amazon_average_weight = Column(Float, default=0.0)
+    amazon_deviation_weight = Column(Float, default=0.0)
+    amazon_fee = Column(Float, default=0.0)
     number_of_shopify_sites = Column(Integer, default=0)
-
+    min_retail_cost = Column(Float, default=0)
 
 class Database:
     def __init__(self):

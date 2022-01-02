@@ -3,14 +3,13 @@ import time
 import logging
 
 import selenium
+from IPython import embed
 
 import utils.system as system
+import utils.language_utils as language_utils
 from scraper.core.drivers import Driver, WebDriverWait, EC, By
-from scraper.core.category import Category as CategoryModel
-from scraper.core.item import Item as ItemModel
-from scraper.core.utils.language_utils import LanguageUtils
-
-from IPython import embed
+from database.category import Category as CategoryModel
+from database.item import Item as ItemModel
 
 
 class Aliexpress(Driver):
@@ -18,7 +17,6 @@ class Aliexpress(Driver):
         super().__init__()
         self.category = CategoryModel()
         self.item = ItemModel()
-        self._scrape_pages()
 
     def _scrape_pages(self):
         # TODO make the urls and amazon_category more dynamic
@@ -77,14 +75,14 @@ class Aliexpress(Driver):
         )
         image_element = self.driver.find_element_by_class_name("magnifier-image")
 
-        category_words = LanguageUtils.get_important_title_words(
+        category_words = language_utils.get_important_title_words(
             title_element.text, description_element.text
         )
-        dimensions = LanguageUtils.get_dimensions(description_element.text)
-        weight_or_material = LanguageUtils.get_weight_or_material(
+        dimensions = language_utils.get_dimensions(description_element.text)
+        weight = language_utils.get_weight(
             description_element.text
         )
-        quantity = LanguageUtils.get_units_available(quantity_element.text)
+        quantity = language_utils.get_units_available(quantity_element.text)
         image_url = image_element.get_attribute("src")
         price = self._scrape_price()
 
@@ -108,13 +106,13 @@ class Aliexpress(Driver):
             packaging_element = self.driver.find_element_by_class_name(
                 "product-quantity-package"
             )
-            unit_discounts = LanguageUtils.get_unit_discounts(packaging_element.text)
+            unit_discounts = language_utils.get_unit_discounts(packaging_element.text)
         else:
             unit_discounts = {"discount": 0, "discount_amount": 0}
 
         # Find or create the category if it doesn't exist
         # then create the item and assign it the category
-        category = self.category.find_or_create(category_words=category_words)
+        category = self.category.find_or_create(category_words=category_words, amazon_category=amazon_category)
 
         self.item.find_or_create(
             title=title_element.text,
@@ -124,7 +122,7 @@ class Aliexpress(Driver):
             shipping_price=shipping_price,
             shipping_price_10_units=shipping_price_10_units,
             url=self.driver.current_url,
-            weight_or_material=weight_or_material,
+            weight=weight,
             unit_discounts=unit_discounts,
             quantity=quantity,
             amazon_category=amazon_category,
@@ -169,4 +167,4 @@ class Aliexpress(Driver):
 
     @classmethod
     def run(cls):
-        cls()
+        cls()._scrape_pages()

@@ -1,8 +1,9 @@
 import threading
+
 from flask import render_template, jsonify
 
+from calculator.calculator import Calculator
 from scraper import scrape
-
 from database.db import Database, Item as ItemDB, Category as CategoryDB, func
 
 
@@ -47,6 +48,9 @@ def category(category_id):
     session.close()
     return render_template("category.html", records=records, count=count)
 
+
+def calculations():
+    return render_template("calculations.html")
 
 def api_scrape_all():
     scraper = threading.Thread(target=scrape.scrape_all())

@@ -3,7 +3,8 @@ import scraper.scrape as scrape
 
 
 def run_application():
-    app.start()
+    # app.start()
+    scrape.scrape_amazon_categories()
 
 
 def main():

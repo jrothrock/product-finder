@@ -1,17 +1,17 @@
-from redis import Redis
+import redis
 from sqlalchemy.orm.exc import NoResultFound
+from IPython import embed
 
 from database.db import Category as CategoryDB, Database as db
-
-from IPython import embed
 
 
 class Category(db):
     def __init__(self):
         super().__init__()
+        self.redis = redis.Redis()
 
     def find_or_create(self, **kwargs):
-        title = self.create_title(kwargs["category_words"])
+        title = self._create_title(kwargs["category_words"])
         try:
             category = (
                 self.session.query(CategoryDB).filter_by(title=title).one()
@@ -22,8 +22,8 @@ class Category(db):
         return category
 
     def new(self, **kwargs):
-        title = self._create_title(kwargs["category_words"])
-        new_category = CategoryDB(title=title)
+        title = self._create_title(kwargs.get("category_words"))
+        new_category = CategoryDB(title=title, amazon_category = kwargs.get("amazon_category"))
         self.session.add(new_category)
         self.session.commit()
         self.session.refresh(new_category)
@@ -39,4 +39,4 @@ class Category(db):
             return "_".join(values)
 
     def _add_to_redis_queue(self, new_category):
-        Redis().lpush("queue:category", new_category.id)
+        self.redis.rpush("queue:category:amazon:listings", new_category.id)

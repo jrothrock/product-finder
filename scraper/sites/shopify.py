@@ -1,25 +1,22 @@
-import redis
 import time
 import re
 import logging
 
-import utils.system as system
-from scraper.core.drivers import Driver
-
-from database.db import Database, Category as CategoryDB
-
+import redis
 from IPython import embed
 
+import utils.system as system
+from scraper.core.drivers import Driver
+from database.db import Database, Category as CategoryDB
 
 class ShopifyCategory(Driver):
     def __init__(self):
         super().__init__()
         self.redis = redis.Redis()
-        self._check_categories()
 
     def _check_categories(self):
-        category_ids = self.redis.lrange("queue:shopify", 0, -1)
-        # self.redis.delete("queue:shopify")
+        category_ids = self.redis.lrange("queue:category:shopify", 0, -1)
+        self.redis.delete("queue:category:shopify")
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):
@@ -67,4 +64,4 @@ class ShopifyCategory(Driver):
 
     @classmethod
     def run(cls):
-        cls()
+        cls()._check_categories()

@@ -1,12 +1,13 @@
 import nltk
-from application import views
-
 from flask import Flask
+
+from application import views
 
 app = Flask(__name__)
 app.add_url_rule("/", view_func=views.index)
 app.add_url_rule("/categories", view_func=views.categories)
 app.add_url_rule("/category/<int:category_id>", view_func=views.category)
+app.add_url_rule("/calculations", view_func=views.calculations)
 app.add_url_rule("/api/scrape/all", view_func=views.api_scrape_all, methods=["POST"])
 app.add_url_rule(
     "/api/scrape/aliexpress", view_func=views.api_scrape_aliexpress, methods=["POST"]
