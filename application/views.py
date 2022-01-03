@@ -2,7 +2,7 @@ import threading
 
 from flask import render_template, jsonify
 
-from calculator.calculator import Calculator
+import calculator.calculator as calculator
 from scraper import scrape
 from database.db import Database, Item as ItemDB, Category as CategoryDB, func
 
@@ -84,4 +84,6 @@ def api_scrape_shopify_categories():
 
 
 def api_run_calculator():
+    calc = threading.Thread(target=calculator.calculate_all())
+    calc.start()
     return jsonify(success=True)

@@ -109,3 +109,5 @@ class Item(db):
             and new_item.weight != 0
         ):
             self.redis.rpush("queue:item:amazon:fees", new_item.id)
+        else:
+            self.redis.rpush("queue:item:calculator", new_item.id)

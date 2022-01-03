@@ -1,3 +1,5 @@
+# Honestly, I should have gone with a non relational database.
+
 import sqlalchemy as db
 from sqlalchemy import (
     func,
@@ -39,8 +41,8 @@ class Item:
     weight = Column(Float, default=0.0)
     url = Column(String)
     image_url = Column(String)
-    item_processed = Column(Boolean, default=False)
     break_even_sale_price = Column(Float, default=False)
+    break_even_amazon_sale_price = Column(Float, default=False)
 
 
 @mapper_registry.mapped
@@ -68,7 +70,8 @@ class Category:
     amazon_deviation_weight = Column(Float, default=0.0)
     amazon_fee = Column(Float, default=0.0)
     number_of_shopify_sites = Column(Integer, default=0)
-    min_retail_cost = Column(Float, default=0)
+    average_min_break_even = Column(Float, default=0)
+    average_min_break_even_amazon = Column(Float, default=0)
 
 
 class Database:
