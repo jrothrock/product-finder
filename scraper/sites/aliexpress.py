@@ -23,14 +23,22 @@ class Aliexpress(Driver):
         category_mappings = mappings.get_category_mappings()
         category_mapping_keys = category_mappings.get("categories", {}).keys()
         for category_id in category_mapping_keys:
-            amazon_url = category_mappings.get("categories", {}).get(category_id, {}).get("aliexpress_url", None)
+            amazon_url = (
+                category_mappings.get("categories", {})
+                .get(category_id, {})
+                .get("aliexpress_url", None)
+            )
             self.driver.get(amazon_url)
             amazon_category = int(category_id)
             pages = 0
             while True:
                 current_url = self.driver.current_url
-                self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight);")
-                url_elements = self.driver.find_elements_by_xpath("//div[contains(@class, 'product-container')]//a[.//h1]")
+                self.driver.execute_script(
+                    "window.scrollTo(0,document.body.scrollHeight);"
+                )
+                url_elements = self.driver.find_elements_by_xpath(
+                    "//div[contains(@class, 'product-container')]//a[.//h1]"
+                )
                 urls = [url_elem.get_attribute("href") for url_elem in url_elements]
                 for link in urls:
                     try:

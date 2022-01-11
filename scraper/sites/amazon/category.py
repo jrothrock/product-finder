@@ -128,8 +128,10 @@ class AmazonCategory(Driver):
         session.commit()
         session.close()
         self.redis.rpush("queue:category:shopify", category.id)
-        
-        category_dimensions_and_weight_dict_values = category_dimensions_and_weight_dict.values()
+
+        category_dimensions_and_weight_dict_values = (
+            category_dimensions_and_weight_dict.values()
+        )
         if None not in category_dimensions_and_weight_dict_values:
             self.redis.rpush("queue:category:amazon:fees", category.id)
 
@@ -173,10 +175,16 @@ class AmazonCategory(Driver):
                 product_dimensions_and_weight = (
                     self._get_amazon_product_dimensions_and_weight(product_link)
                 )
-                category_lengths.append(product_dimensions_and_weight.get("length", None))
+                category_lengths.append(
+                    product_dimensions_and_weight.get("length", None)
+                )
                 category_widths.append(product_dimensions_and_weight.get("width", None))
-                category_heights.append(product_dimensions_and_weight.get("height", None))
-                category_weights.append(product_dimensions_and_weight.get("weight", None))
+                category_heights.append(
+                    product_dimensions_and_weight.get("height", None)
+                )
+                category_weights.append(
+                    product_dimensions_and_weight.get("weight", None)
+                )
             except KeyboardInterrupt:
                 system.exit()
             except Exception as e:
