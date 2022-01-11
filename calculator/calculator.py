@@ -1,6 +1,7 @@
 import logging
 
 import redis
+from IPython import embed
 
 import utils.system as system
 from database.db import Database, Category as CategoryDB, Item as ItemDB
@@ -51,12 +52,12 @@ class CategoryCalculator:
         estimated_shipping_cost = (
             calculated_shipping_cost
             if calculated_shipping_cost
-            else category.average_amazon_price * 0.1
+            else category.amazon_average_price * 0.1
         )
         average_min_break_even = (
             category.amazon_average_price - estimated_shipping_cost
         ) * (1 - GROSS_MARGIN_PERCENTAGE)
-        average_min_break_even_amazon = average_min_break_even - category.amazon_fee
+        average_min_break_even_amazon = average_min_break_even + category.amazon_fee
         session = Database().session
         session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
             {

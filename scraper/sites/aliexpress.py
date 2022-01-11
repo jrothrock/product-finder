@@ -7,6 +7,7 @@ from IPython import embed
 
 import utils.system as system
 import utils.language_utils as language_utils
+import utils.mappings as mappings
 from scraper.core.drivers import Driver, WebDriverWait, EC, By
 from database.category import Category as CategoryModel
 from database.item import Item as ItemModel
@@ -19,46 +20,44 @@ class Aliexpress(Driver):
         self.item = ItemModel()
 
     def _scrape_pages(self):
-        # TODO make the urls and amazon_category more dynamic
-        self.driver.get(
-            "https://www.aliexpress.com/category/15/home-garden.html?&SortType=create_desc"
-        )
-        amazon_category = 1
-        pages = 0
-        while True:
-            current_url = self.driver.current_url
-            self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight);")
-            url_elements = self.driver.find_elements(By.CLASS_NAME, "_3KNwG")
-            urls = [url_elem.get_attribute("href") for url_elem in url_elements]
-            for link in urls:
-                try:
-                    self._scrape_page(link, amazon_category)
-                except KeyboardInterrupt:
-                    system.exit()
-                except selenium.common.exceptions.TimeoutException:
-                    logging.exception(
-                        "Timeout occurred on page. Items may not have been found. Passing"
-                    )
-                    pass
-                except Exception as e:
-                    logging.exception(
-                        f"Exception scraping aliexpress page: {e.__dict__}"
-                    )
-                    pass
+        category_mappings = mappings.get_category_mappings()
+        category_mapping_keys = category_mappings.get("categories", {}).keys()
+        for category_id in category_mapping_keys:
+            amazon_url = category_mappings.get("categories", {}).get(category_id, {}).get("aliexpress_url", None)
+            self.driver.get(amazon_url)
+            amazon_category = int(category_id)
+            pages = 0
+            while True:
+                current_url = self.driver.current_url
+                self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+                url_elements = self.driver.find_elements_by_xpath("//div[contains(@class, 'product-container')]//a[.//h1]")
+                urls = [url_elem.get_attribute("href") for url_elem in url_elements]
+                for link in urls:
+                    try:
+                        self._scrape_page(link, amazon_category)
+                    except KeyboardInterrupt:
+                        system.exit()
+                    except selenium.common.exceptions.TimeoutException:
+                        logging.exception(
+                            "Timeout occurred on page. Items may not have been found. Passing"
+                        )
+                        pass
+                    except Exception as e:
+                        logging.exception(
+                            f"Exception scraping aliexpress page: {e.__dict__}"
+                        )
+                        pass
 
-            self.driver.get(current_url)
-            self.driver.execute_script(
-                "window.scrollTo(0,document.body.scrollHeight - 1750);"
-            )
-            pages += 1
+                self.driver.get(current_url)
+                self.driver.execute_script(
+                    "window.scrollTo(0,document.body.scrollHeight - 1750);"
+                )
+                pages += 1
 
-            if pages >= 3:
-                # embed()
-                # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first()
-                # Database().session.query(ItemDB, CategoryDB).join(CategoryDB).first().Item.__dict__
-                break
-            time.sleep(1)
-            self.driver.find_element_by_class_name("next-next").click()
+                if pages >= 3:
+                    break
+                time.sleep(1)
+                self.driver.find_element_by_class_name("next-next").click()
 
     def _scrape_page(self, link, amazon_category):
         time.sleep(1)

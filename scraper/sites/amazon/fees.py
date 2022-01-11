@@ -5,6 +5,7 @@ import redis
 from IPython import embed
 
 import utils.system as system
+import utils.mappings as mappings
 from scraper.core.drivers import Driver
 from database.db import Database, Item as ItemDB, Category as CategoryDB
 
@@ -87,8 +88,10 @@ class AmazonFee(Driver):
             "//span[contains(text(), 'Select category')]"
         ).click()
 
+        mapped_amazon_category = mappings.map_amazon_category(record.amazon_category)
+
         self.driver.find_element_by_xpath(
-            "//a[contains(text(), '" + record.amazon_category + "')]"
+            "//a[contains(text(), '" + mapped_amazon_category + "')]"
         ).click()
 
         self.driver.find_element_by_id("estimate-new-announce").click()

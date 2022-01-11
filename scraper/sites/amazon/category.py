@@ -109,7 +109,7 @@ class AmazonCategory(Driver):
                     "amazon_average_length", None
                 ),
                 "amazon_average_width": category_dimensions_and_weight_dict.get(
-                    "average_average_width", None
+                    "amazon_average_width", None
                 ),
                 "amazon_average_height": category_dimensions_and_weight_dict.get(
                     "amazon_average_height", None
@@ -128,8 +128,9 @@ class AmazonCategory(Driver):
         session.commit()
         session.close()
         self.redis.rpush("queue:category:shopify", category.id)
-
-        if len(category_dimensions_and_weight_dict.keys()):
+        
+        category_dimensions_and_weight_dict_values = category_dimensions_and_weight_dict.values()
+        if None not in category_dimensions_and_weight_dict_values:
             self.redis.rpush("queue:category:amazon:fees", category.id)
 
     def _get_price_from_text(self, price_text):
@@ -167,14 +168,21 @@ class AmazonCategory(Driver):
         category_weights = []
 
         # uses higher than 3 to eliminate sponsored products
-        for product_link in product_links[4:7]:
-            product_dimensions_and_weight = (
-                self._get_amazon_product_dimensions_and_weight(product_link)
-            )
-            category_lengths.append(product_dimensions_and_weight.get("length", None))
-            category_widths.append(product_dimensions_and_weight.get("width", None))
-            category_heights.append(product_dimensions_and_weight.get("height", None))
-            category_weights.append(product_dimensions_and_weight.get("weight", None))
+        for product_link in product_links[4:8]:
+            try:
+                product_dimensions_and_weight = (
+                    self._get_amazon_product_dimensions_and_weight(product_link)
+                )
+                category_lengths.append(product_dimensions_and_weight.get("length", None))
+                category_widths.append(product_dimensions_and_weight.get("width", None))
+                category_heights.append(product_dimensions_and_weight.get("height", None))
+                category_weights.append(product_dimensions_and_weight.get("weight", None))
+            except KeyboardInterrupt:
+                system.exit()
+            except Exception as e:
+                logging.exception(
+                    f"Exception getting amazon product dimensions and weight: {e.__dict__}"
+                )
 
         category_dimensions = [
             l * w * h
@@ -196,7 +204,7 @@ class AmazonCategory(Driver):
             if len(category_heights)
             else None
         )
-        amazon_deviation_height = (
+        amazon_deviation_dimensions = (
             statistics.pstdev(category_dimensions) if len(category_dimensions) else None
         )
         amazon_average_weight = (
@@ -212,7 +220,7 @@ class AmazonCategory(Driver):
             "amazon_average_length": amazon_average_length,
             "amazon_average_width": amazon_average_width,
             "amazon_average_height": amazon_average_height,
-            "amazon_deviation_dimensions": amazon_deviation_height,
+            "amazon_deviation_dimensions": amazon_deviation_dimensions,
             "amazon_average_weight": amazon_average_weight,
             "amazon_deviation_weight": amazon_deviation_weight,
         }

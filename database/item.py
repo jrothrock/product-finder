@@ -29,7 +29,6 @@ class Item(db):
     def new(self, **kwargs):
         dimensions_in_inches = self._dimensions(kwargs["dimensions"])
         weight = self._weight_in_pounds(kwargs["weight"])
-        amazon_category = self._amazon_category(kwargs["amazon_category"])
         try:
             new_item = ItemDB(
                 title=kwargs["title"],
@@ -43,7 +42,7 @@ class Item(db):
                 url=kwargs["url"],
                 image_url=kwargs["image_url"],
                 category_id=kwargs["category_id"],
-                amazon_category=amazon_category,
+                amazon_category=kwargs["amazon_category"],
                 available_quantity=kwargs["quantity"],
                 unit_discount_percentage=kwargs.get("unit_discounts", {}).get(
                     "discount", None
@@ -96,10 +95,6 @@ class Item(db):
         return unit_conversions.convert_to_pounds(
             values["weight"], values["measurement"]
         )
-
-    def _amazon_category(self, category):
-        if category == 1:
-            return "Home and Garden (including Pet Supplies)"
 
     def _add_to_redis_queue(self, new_item):
         if (
