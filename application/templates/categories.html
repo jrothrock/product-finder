@@ -1,57 +1,79 @@
 <!doctype html>
-<link href="https://unpkg.com/tabulator-tables@4.9.3/dist/css/tabulator.min.css" rel="stylesheet">
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.min.js"></script>
-<title>Item Finder</title>
+<html>
+  <header>
+    <link href="https://unpkg.com/tabulator-tables@4.9.3/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.min.js"></script>
+    <title>Item Finder</title>
+  </header>
 
-<div style='display: flex; flex-wrap: wrap;'>
-  <div style='margin: 5px'>
-    <a href="/">Index</a>
-  </div>
-  <div style='margin: 5px'>
-    <a href="/categories">Categories</a>
-  </div>
-  <div style='margin: 5px'>
-    <a href="/calculations">Calculations</a>
-  </div>
-</div>
+  <body>
+    <div style='display: flex; flex-wrap: wrap;'>
+      <div style='margin: 5px'>
+        <a href="{{url_for('index')}}">Index</a>
+      </div>
+      <div style='margin: 5px'>
+        <a href="{{url_for('categories')}}">Categories</a>
+      </div>
+      <div style='margin: 5px'>
+        <a href="{{url_for('items')}}">Items</a>
+      </div>
+    </div>
 
-<div style='display: flex; flex-wrap: wrap;'>
-  <div style='margin: 10px'>
-    <p>Category Count: {{category_count}}</p>
-  </div>
-</div>
+    <div style='display: flex; flex-wrap: wrap;'>
+      <div style='margin: 10px'>
+        <p>Category Count: {{category_count}}</p>
+      </div>
+    </div>
 
-<div id="categories-table"></div>
+    <div id="categories-table"></div>
 
+    <div id='pagination' style='margin-top: 10px'>
+      {% if current_page > 1 %}
+        <a href="{{url_for('categories', page=(current_page - 1))}}" style='margin-right: 5px'><< Previous Page</a>
+      {% endif %}
 
-<script type="text/javascript">
-  records = [
-    {% for record in records %}
-      { 
-        title: "{{record.title}}",
-        category_url: "/category/{{record.id}}",
-        amazon_min_price: "{{record.amazon_min_price}}", 
-        amazon_max_price: "{{record.amazon_max_price}}",
-        amazon_total_results: "{{record.amazon_total_results}}", 
-        amazon_max_rating: "{{record.amazon_max_rating}}", 
-        amazon_min_rating: {{record.amazon_min_rating}}, 
-        number_of_shopify_sites: {{record.number_of_shopify_sites}},
-      }, 
-    {% endfor %}
-  ];
+      {% if has_next_page %}
+        <a href="{{url_for('categories', page=(current_page + 1))}}">Next Page >></a>
+      {% endif %}
+    </div>
+  </body>
+  
+  <footer>
+    <script type="text/javascript">
+      records = [
+        {% for record in records %}
+          { 
+            title: "{{record.Category.title}}",
+            category_url: "{{url_for('category', category_id=record.Category.id)}}",
+            amazon_average_price: "{{'%0.2f' | format(record.Category.amazon_average_price | float)}}",
+            calculated_profit: "{{'%0.2f' | format(record.profit|float)}}",
+            average_min_break_even: "{{'%0.2f' | format(record.Category.average_min_break_even | float)}}",
+            average_min_break_even_amazon: "{{'%0.2f' | format(record.Category.average_min_break_even_amazon | float)}}",
+            amazon_deviation_price: "{{'%0.2f' | format(record.Category.amazon_deviation_price | float)}}",
+            amazon_total_results:  "{{record.Category.amazon_total_results}}",
+            amazon_average_rating: "{{'%0.2f' | format(record.Category.amazon_average_rating | float)}}",
+            amazon_deviation_rating: "{{'%0.2f' | format(record.Category.amazon_deviation_rating | float)}}",
+            number_of_shopify_sites: "{{record.Category.number_of_shopify_sites}}"
+          }, 
+        {% endfor %}
+      ];
 
-  var table = new Tabulator("#categories-table", {
-    data:records, //assign data to table
-    layout:"fitColumns", //fit columns to width of table (optional)
-    columns:[ //Define Table Columns
-      {title:"Category", headerFilter:"input", field:"title", width:200, formatter:"link", formatterParams:{labelField:"title", urlField: "category_url", target:"_blank"}},
-      {title:"Amazon Min Price", field:"amazon_min_price", hozAlign:"left"},
-      {title:"Amazon Max Price", field:"amazon_max_price", hozAlign:"left"},
-      {title:"Amazon Total Result", field:"amazon_total_results", hozAlign:"left"},
-      {title:"Amazon Max Rating", field:"amazon_max_rating", hozAlign:"left"},
-      {title:"Amazon Min Rating", field:"amazon_min_rating", hozAlign:"left"},
-      {title:"Number of Shopify Sites", field:"number_of_shopify_sites", hozAlign:"left"}
-    ]
-  });
-
-</script>
+      var table = new Tabulator("#categories-table", {
+        data:records, //assign data to table
+        layout:"fitColumns", //fit columns to width of table (optional)
+        columns:[ //Define Table Columns
+          {title:"Category", field:"title", width:200, formatter:"link", formatterParams:{labelField:"title", urlField: "category_url", target:"_blank"}},
+          {title:"Amazon Average Price", field:"amazon_average_price", hozAlign:"left"},
+          {title:"Calculated Profit", field:"calculated_profit", hozAlign:"left"},
+          {title:"Amazon Min Break Even ", field:"average_min_break_even", hozAlign:"left"},
+          {title:"Amazon Min Break Even Amazon", field:"average_min_break_even_amazon", hozAlign:"left"},
+          {title:"Amazon Deviation Price", field:"amazon_deviation_price", hozAlign:"left"},
+          {title:"Amazon Total Results", field:"amazon_total_results", hozAlign:"left"},
+          {title:"Amazon Average Ratings", field:"amazon_average_rating", hozAlign:"left"},
+          {title:"Amazon Deviation Ratings", field:"amazon_deviation_rating", hozAlign:"left"},
+          {title:"Number of Shopify Sites", field:"number_of_shopify_sites", hozAlign:"left"}
+        ]
+      });
+    </script>
+  </footer>
+</html>

@@ -19,37 +19,24 @@
     </div>
 
     <div style='display: flex; flex-wrap: wrap;'>
+      <h2>Item: "{{records[0].Item.title}}"</h2>
+    </div>
+
+
+    <div id="items-table"></div>
+
+    <div style='display: flex; flex-wrap: wrap;'>
       <h2>Category: "{{records[0].Category.title}}"</h2>
     </div>
 
     <div id="category-table"></div>
-
-    <div style='display: flex; flex-wrap: wrap;'>
-      <div>
-        <h2>Items</h2>
-        <p>Item Count: {{count}}</p>
-      </div>
-    </div>
-    
-    <div id="items-table"></div>
-
-    <div id='pagination' style='margin-top: 10px'>
-      {% if current_page > 1 %}
-        <a href="{{url_for('categories', category_id=request.view_args.get('category_id'), page=(current_page - 1))}}" style='margin-right: 5px'><< Previous Page</a>
-      {% endif %}
-
-      {% if has_next_page %}
-        <a href="{{url_for('categories', category_id=request.view_args.get('category_id'), page=(current_page + 1))}}">Next Page >></a>
-      {% endif %}
-    </div>
   </body>
   <footer>
     <script type="text/javascript">
       category_record = [
         { 
             title: "{{records[0].Category.title}}",
-            category_url: "{{url_for('category', category_id=records[0].Category.id)}}",
-            amazon_category_url: "https://www.amazon.com/s?k={{records[0].Category.title | replace('_', '+')}}",
+            category_url: "/category/{{records[0].Category.id}}",
             amazon_average_price: "{{'%0.2f' | format(records[0].Category.amazon_average_price | float)}}",
             calculated_profit: "{{'%0.2f' | format(records[0].profit|float)}}",
             average_min_break_even: "{{'%0.2f' | format(records[0].Category.average_min_break_even | float)}}",
@@ -63,30 +50,26 @@
       ]
 
       item_records = [
-        {% for record in records %}
           { 
-            item_image: "{{record.Item.image_url}}",
-            item_title: "{{record.Item.title}}",
-            item_url: "{{url_for('item', item_id=record.Item.id)}}",
-            item_aliexpress_url: "{{record.Item.url}}",
-            amazon_category: "{{record.Item.amazon_category}}", 
-            category: "{{record.Category.title}}", 
-            price: "{{record.Item.price}}", 
-            available: "{{record.Item.available_quantity}}",
-            shipping_price: "{{record.Item.shipping_price}}", 
-            shipping_price_10_units: "{{record.Item.shipping_price_10_units}}", 
-            dimensions: "w: {{'%0.2f' | format(record.Item.width | float)}}, l: {{'%0.2f' | format(record.Item.length | float)}}, h: {{'%0.2f' | format(record.Item.height | float)}}", 
-            weight: "{{'%0.2f' | format(record.Item.weight | float)}}", 
-            amazon_fee: "{{record.Item.amazon_fee}}"
+            item_image: "{{records[0].Item.image_url}}",
+            item_title: "{{records[0].Item.title}}", 
+            item_url: "{{records[0].Item.url}}",
+            amazon_category: "{{records[0].Item.amazon_category}}", 
+            category: "{{records[0].Category.title}}", 
+            price: "{{records[0].Item.price}}", 
+            available: "{{records[0].Item.available_quantity}}",
+            shipping_price: "{{records[0].Item.shipping_price}}", 
+            shipping_price_10_units: "{{records[0].Item.shipping_price_10_units}}", 
+            dimensions: "w: {{'%0.2f' | format(records[0].Item.width | float)}}, l: {{'%0.2f' | format(records[0].Item.length | float)}}, h: {{'%0.2f' | format(records[0].Item.height | float)}}", 
+            weight: "{{'%0.2f' | format(records[0].Item.weight | float)}}", 
+            amazon_fee: "{{records[0].Item.amazon_fee}}"
           }, 
-        {% endfor %}
       ];
 
       var table = new Tabulator("#category-table", {
         data:category_record, //assign data to table
         layout:"fitColumns", //fit columns to width of table (optional)
         columns:[ //Define Table Columns
-          {title:"Amazon URL", field:"title", width:200, formatter:"link", formatterParams:{labelField:"title", urlField:"amazon_category_url", target:"_blank"}},
           {title:"Amazon Average Price", field:"amazon_average_price", hozAlign:"left"},
           {title:"Calculated Profit", field:"calculated_profit", hozAlign:"left"},
           {title:"Amazon Min Break Even ", field:"average_min_break_even", hozAlign:"left"},
@@ -103,9 +86,8 @@
         data:item_records, //assign data to table
         layout:"fitColumns", //fit columns to width of table (optional)
         columns:[ //Define Table Columns
-          {title:"", field:"item_image", formatter:"image", formatterParams:{height:"50px", width:"50px"}},
+          {title:"", field:"item_image",formatter:"image", formatterParams:{height:"50px", width:"50px"}},
           {title:"Item", field:"item_title", width:200, formatter:"link", formatterParams:{labelField:"item_title", urlField:"item_url", target:"_blank"}},
-          {title:"Aliexpress URL", field:"item_title", width:150, formatter:"link", formatterParams:{labelField:"item_title", urlField:"item_aliexpress_url", target:"_blank"}},
           {title:"Category", field:"category", hozAlign:"left"},
           {title:"Amazon Category", field:"amazon_category", hozAlign:"left"},
           {title:"Price", field:"price", hozAlign:"left"},

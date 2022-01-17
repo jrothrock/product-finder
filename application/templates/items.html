@@ -17,34 +17,10 @@
         <a href="{{url_for('items')}}">Items</a>
       </div>
     </div>
-
+    
     <div style='display: flex; flex-wrap: wrap;'>
       <div style='margin: 10px'>
         <p>Item Count: {{item_count}}</p>
-      </div>
-      <div style='margin: 10px'>
-        <p>Category Count: {{category_count}}</p>
-      </div>
-    </div>
-
-    <div style='display: flex; flex-wrap: wrap;'>
-      <div style='margin: 10px'>
-        <button class='action-button' id='scape-all' data-url='/api/scrape/all'>Scrape All</button>
-      </div>
-      <div style='margin: 10px'>
-        <button class='action-button' id='scape-aliexpress' data-url='/api/scrape/aliexpress'>Scrape AliExpress</button>
-      </div>
-      <div style='margin: 10px'>
-        <button class='action-button' id='scrape-categories' data-url='/api/scrape/amazon/categories'>Scrape Categories</button>
-      </div>
-      <div style='margin: 10px'>
-        <button class='action-button' id='scrape-amazon-fees' data-url='/api/scrape/amazon/fees'>Scrape Amazon Fees</button>
-      </div>
-      <div style='margin: 10px'>
-        <button class='action-button' id='scrape-shopify' data-url='/api/scrape/amazon/shopify'>Scrape Shopify</button>
-      </div>
-      <div style='margin: 10px'>
-        <button class='action-button' id='run-calculator' data-url='/api/run/calculator/'>Run Calculator</button>
       </div>
     </div>
 
@@ -52,28 +28,26 @@
 
     <div id='pagination' style='margin-top: 10px'>
       {% if current_page > 1 %}
-        <a href="{{url_for('index', page=(current_page - 1))}}" style='margin-right: 5px'><< Previous Page</a>
+        <a href="{{url_for('items', page=(current_page - 1))}}" style='margin-right: 5px'><< Previous Page</a>
       {% endif %}
 
       {% if has_next_page %}
-        <a href="{{url_for('index', page=(current_page + 1))}}">Next Page >></a>
+        <a href="{{url_for('items', page=(current_page + 1))}}">Next Page >></a>
       {% endif %}
     </div>
   </body>
-
   <footer>
-    <script type="text/javascript">
+    <script>
       records = [
         {% for record in records %}
           { 
             item_image: "{{record.Item.image_url}}",
             item_title: "{{record.Item.title}}", 
-            item_url: "{{url_for('item', item_id=record.Item.id)}}",
+            item_url: "{{record.Item.url}}",
+            amazon_category: "{{record.Item.amazon_category}}", 
             category: "{{record.Category.title}}",
             category_url: "{{url_for('category', category_id=record.Category.id)}}",
             price: "{{record.Item.price}}", 
-            amazon_average_price: "{{'%0.2f' | format(record.Category.amazon_average_price | float)}}",
-            potential_profit: "{{'%0.2f' | format(record.profit | float)}}",
             available: "{{record.Item.available_quantity}}",
             shipping_price: "{{record.Item.shipping_price}}", 
             shipping_price_10_units: "{{record.Item.shipping_price_10_units}}", 
@@ -88,12 +62,11 @@
         data:records, //assign data to table
         layout:"fitColumns", //fit columns to width of table (optional)
         columns:[ //Define Table Columns
-          {title:"", field:"item_image",formatter:"image", formatterParams:{height:"50px", width:"50px"}},
+          {title: "", field:"item_image",formatter:"image", formatterParams:{height:"50px", width:"50px"}},
           {title:"Item", field:"item_title", width:200, formatter:"link", formatterParams:{labelField:"item_title", urlField:"item_url", target:"_blank"}},
-          {title:"Category", field:"category", width:200, formatter:"link", formatterParams:{labelField:"category", urlField:"category_url", target:"_blank"}},
-          {title:"Item Price", field:"price", hozAlign:"left"},
-          {title:"Category Avg. Amz. Price", field:"amazon_average_price", hozAlign:"left"},
-          {title:"Potential Profit", field:"potential_profit", hozAlign:"left"},
+          {title:"Category", field:"item_title", width:100, formatter:"link", formatterParams:{labelField:"category", urlField:"category_url", target:"_blank"}},
+          {title:"Amazon Category", field:"amazon_category", hozAlign:"left"},
+          {title:"Price", field:"price", hozAlign:"left"},
           {title:"Available", field:"available", hozAlign:"left"},
           {title:"Shipping Price", field:"shipping_price", hozAlign:"left"},
           {title:"Shipping Price 10 units", field:"shipping_price_10_units", hozAlign:"left"},
@@ -102,20 +75,6 @@
           {title:"Amazon Fee", field:"amazon_fee", hozAlign:"left"}
         ]
       });
-
-      var clickElements = document.getElementsByClassName("action-button");
-      for (var i = 0; i < clickElements.length; i++) { 
-        clickElements[i].addEventListener('click', function (event) { 
-          
-          if(!event.target.dataset.url) return;
-          
-          fetch(event.target.dataset.url, {
-            method: "POST",
-          }).then(res => {
-            console.log("Request complete! response:", res);
-          });
-        })
-      }
     </script>
   </footer>
 </html>
