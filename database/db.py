@@ -43,6 +43,7 @@ class Item:
     image_url = Column(String)
     break_even_sale_price = Column(Float, default=False)
     break_even_amazon_sale_price = Column(Float, default=False)
+    hidden = Column(Float, default=False)
 
 
 @mapper_registry.mapped
@@ -72,6 +73,8 @@ class Category:
     number_of_shopify_sites = Column(Integer, default=0)
     average_min_break_even = Column(Float, default=0)
     average_min_break_even_amazon = Column(Float, default=0)
+    hidden = Column(Float, default=False)
+    title_version = Column(Integer, default=1)
 
 
 class Database:

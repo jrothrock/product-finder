@@ -23,14 +23,18 @@ class Category(db):
 
     def new(self, **kwargs):
         title = self._create_title(kwargs.get("category_words"))
+        title_version = self._title_cohort()
         new_category = CategoryDB(
-            title=title, amazon_category=kwargs.get("amazon_category")
+            title=title, amazon_category=kwargs.get("amazon_category"), title_version=title_version
         )
         self.session.add(new_category)
         self.session.commit()
         self.session.refresh(new_category)
         self._add_to_redis_queue(new_category)
         return new_category
+
+    def _title_cohort():
+        return 1
 
     def _create_title(self, values):
         # TODO need to investigate why values is type None

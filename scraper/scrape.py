@@ -23,6 +23,6 @@ def scrape_shopify_categories():
 
 def scrape_all():
     scrape_aliexpress()
-    scrape_amazon_fees()
     scrape_amazon_categories()
+    scrape_amazon_fees()
     scrape_shopify_categories()
