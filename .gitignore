@@ -5,3 +5,4 @@ env
 *.sqlite
 .DS_STORE
 dump.rdb
+celerybeat-schedule

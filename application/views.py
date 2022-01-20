@@ -1,12 +1,12 @@
-import threading
 import math
 
 from flask import render_template, jsonify, request
 from sqlalchemy import text
 from IPython import embed
 
-import calculator.calculator as calculator
-from scraper import scrape
+import calculator
+import scraper
+import tasks
 from database.db import Database, Item as ItemDB, Category as CategoryDB, func
 
 PAGE_SIZE = 50
@@ -170,36 +170,30 @@ def item(item_id):
 
 
 def api_scrape_all():
-    scraper = threading.Thread(target=scrape.scrape_all())
-    scraper.start()
+    tasks.scrape_all()
     return jsonify(success=True)
 
 
 def api_scrape_aliexpress():
-    scraper = threading.Thread(target=scrape.scrape_aliexpress())
-    scraper.start()
+    tasks.scrape_aliexpress()
     return jsonify(success=True)
 
 
 def api_scrape_amazon_fees():
-    scraper = threading.Thread(target=scrape.scrape_amazon_fees())
-    scraper.start()
+    tasks.scrape_amazon_fees()
     return jsonify(success=True)
 
 
 def api_scrape_amazon_categories():
-    scraper = threading.Thread(target=scrape.scrape_amazon_categories())
-    scraper.start()
+    tasks.scrape_amazon_categories()
     return jsonify(success=True)
 
 
 def api_scrape_shopify_categories():
-    scraper = threading.Thread(target=scrape.scrape_shopify_categories())
-    scraper.start()
+    tasks.scrape_shopify_categories()
     return jsonify(success=True)
 
 
 def api_run_calculator():
-    calc = threading.Thread(target=calculator.calculate_all())
-    calc.start()
+    tasks.calculate_all()
     return jsonify(success=True)

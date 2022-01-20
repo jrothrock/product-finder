@@ -33,7 +33,7 @@ class Category(db):
         self._add_to_redis_queue(new_category)
         return new_category
 
-    def _title_cohort():
+    def _title_cohort(self):
         return 1
 
     def _create_title(self, values):
