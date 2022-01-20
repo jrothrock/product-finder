@@ -25,7 +25,9 @@ class Category(db):
         title = self._create_title(kwargs.get("category_words"))
         title_version = self._title_cohort()
         new_category = CategoryDB(
-            title=title, amazon_category=kwargs.get("amazon_category"), title_version=title_version
+            title=title,
+            amazon_category=kwargs.get("amazon_category"),
+            title_version=title_version,
         )
         self.session.add(new_category)
         self.session.commit()

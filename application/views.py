@@ -4,8 +4,6 @@ from flask import render_template, jsonify, request
 from sqlalchemy import text
 from IPython import embed
 
-import calculator
-import scraper
 import tasks
 from database.db import Database, Item as ItemDB, Category as CategoryDB, func
 

@@ -10,15 +10,15 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8f75df52ed9c'
-down_revision = '1b284f077aac'
+revision = "8f75df52ed9c"
+down_revision = "1b284f077aac"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
-    op.add_column('category', sa.Column('title_version', sa.Integer))
+    op.add_column("category", sa.Column("title_version", sa.Integer))
 
 
 def downgrade():
-    op.drop_column('category', 'title_version')
+    op.drop_column("category", "title_version")
