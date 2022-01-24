@@ -1,4 +1,4 @@
-"""add title_version to category
+"""add title_version to category.
 
 Revision ID: 8f75df52ed9c
 Revises: 1b284f077aac
@@ -17,8 +17,10 @@ depends_on = None
 
 
 def upgrade():
+    """Create title_version field for category records."""
     op.add_column("category", sa.Column("title_version", sa.Integer))
 
 
 def downgrade():
+    """Remove title_version field for category records."""
     op.drop_column("category", "title_version")

@@ -1,3 +1,4 @@
+"""Module for adding logic to the various routes."""
 import math
 
 from flask import render_template, jsonify, request
@@ -11,6 +12,7 @@ PAGE_SIZE = 50
 
 
 def index():
+    """Logic for showing categories and items on index/home page."""
     session = Database().session
     item_count = session.query(func.count(ItemDB.id)).scalar()
     category_count = session.query(func.count(CategoryDB.id)).scalar()
@@ -46,6 +48,7 @@ def index():
 
 
 def categories():
+    """Logic for categories on the categories page."""
     session = Database().session
     category_count = session.query(func.count(CategoryDB.id)).scalar()
 
@@ -78,6 +81,7 @@ def categories():
 
 
 def category(category_id):
+    """Logic for showing a specific category page."""
     session = Database().session
     item_count = (
         session.query(ItemDB, CategoryDB)
@@ -116,6 +120,7 @@ def category(category_id):
 
 
 def items():
+    """Logic for showing items on the item page."""
     session = Database().session
     item_count = session.query(func.count(ItemDB.id)).scalar()
 
@@ -148,6 +153,7 @@ def items():
 
 
 def item(item_id):
+    """Logic for showing a specific item page."""
     session = Database().session
 
     records = (
@@ -168,30 +174,36 @@ def item(item_id):
 
 
 def api_scrape_all():
+    """Logic for starting scraping all task."""
     tasks.scrape_all()
     return jsonify(success=True)
 
 
 def api_scrape_aliexpress():
+    """Logic for starting alixpress scraping task."""
     tasks.scrape_aliexpress()
     return jsonify(success=True)
 
 
 def api_scrape_amazon_fees():
+    """Logic for starting amazon fees scraping task."""
     tasks.scrape_amazon_fees()
     return jsonify(success=True)
 
 
 def api_scrape_amazon_categories():
+    """Logic for starting amazon categories scraping task."""
     tasks.scrape_amazon_categories()
     return jsonify(success=True)
 
 
 def api_scrape_shopify_categories():
+    """Logic for starting shopify categories scraping task."""
     tasks.scrape_shopify_categories()
     return jsonify(success=True)
 
 
 def api_run_calculator():
+    """Logic for starting calculations task."""
     tasks.calculate_all()
     return jsonify(success=True)

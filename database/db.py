@@ -1,4 +1,6 @@
+"""Module that houses procedures and schemas for the database."""
 # Honestly, I should have gone with a non relational database.
+import os
 
 import sqlalchemy as db
 from sqlalchemy import (
@@ -20,6 +22,8 @@ mapper_registry = registry()
 
 @mapper_registry.mapped
 class Item:
+    """Schema for Item records."""
+
     __tablename__ = "item"
 
     id = Column(Integer, primary_key=True)
@@ -48,6 +52,8 @@ class Item:
 
 @mapper_registry.mapped
 class Category:
+    """Schema for Item records."""
+
     __tablename__ = "category"
 
     id = Column(Integer, primary_key=True)
@@ -78,8 +84,19 @@ class Category:
 
 
 class Database:
+    """Class which sets up procedures used for communicating with database."""
+
     def __init__(self):
+        """Instantiate communication with the database."""
         self.db = db
+        db_password = os.environ.get("DB_PASSWORD")
+        db_username = os.environ.get("DB_USERNAME")
+        if db_password:
+            engine = (
+                f"postgresql://{db_username}:{db_password}@localhost:5432/scraperdb"
+            )
+        else:
+            engine = "sqlite:///database/test.sqlite"
         self.engine = create_engine(
             "sqlite:///database/test.sqlite", connect_args={"check_same_thread": False}
         )

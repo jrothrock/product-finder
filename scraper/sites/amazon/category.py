@@ -1,3 +1,4 @@
+"""Module which scrapes the Amazon category."""
 import time
 import re
 import logging
@@ -14,16 +15,21 @@ from database.db import Database, Category as CategoryDB
 
 
 class AmazonCategory(Driver):
+    """Class that holds procedures for scraping Amazon categories."""
+
     def __init__(self):
+        """Instantiate Selenium Driver and Redis."""
         super().__init__()
         self.redis = redis.Redis()
 
     def _check_categories(self):
+        """Check the Amazon queue and process the categories."""
         category_ids = self.redis.lrange("queue:category:amazon:listings", 0, -1)
         self.redis.delete("queue:category:amazon:listings")
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):
+        """Check the Amazon category for the Amazon queue."""
         for category_id in category_ids:
             try:
                 self._get_amazon_category(category_id)
@@ -34,6 +40,7 @@ class AmazonCategory(Driver):
                 pass
 
     def _get_amazon_category(self, category_id):
+        """Scrape the amazon category and calculate needed values."""
         category = Database().session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
         self.driver.get(
@@ -136,9 +143,11 @@ class AmazonCategory(Driver):
             self.redis.rpush("queue:category:amazon:fees", category.id)
 
     def _get_price_from_text(self, price_text):
+        """Pull the numeric price from a text string."""
         return float(price_text[1:-1].strip().replace(",", ""))
 
     def _get_number_of_products(self, number_of_products_text):
+        """Pull the number of products for that category."""
         return int(
             re.search("of (over)?(.+) results", number_of_products_text)
             .group(2)
@@ -147,12 +156,15 @@ class AmazonCategory(Driver):
         )
 
     def _get_review_from_text(self, review_text):
+        """Pull the average review for a specific product."""
         return float(re.search("(.+) (out|Stars)", review_text).group(1))
 
     def _get_number_of_ratings_from_text(self, num_ratings_text):
+        """Get the total number of ratings for a specific product."""
         return int(num_ratings_text.strip().replace(",", ""))
 
     def _get_category_dimensions_and_weight(self):
+        """Get the dimensions and weights for a category by averaging a few of the category's products."""
         product_link_elems = self.driver.find_elements_by_xpath(
             "//div[contains(@class, 's-result-list')]//div[contains(@class, 'a-section')]//h2/a[contains(@class, 'a-link-normal')]"
         )
@@ -164,6 +176,7 @@ class AmazonCategory(Driver):
         return self._calculate_dimensions_and_weight(product_links)
 
     def _calculate_dimensions_and_weight(self, product_links):
+        """Perform calculations of dimensions and weight for an Amazon category."""
         category_lengths = []
         category_widths = []
         category_heights = []
@@ -234,6 +247,7 @@ class AmazonCategory(Driver):
         }
 
     def _get_amazon_product_dimensions_and_weight(self, url):
+        """Calculate dimensions and weight for Amazon product."""
         self.driver.get(url)
         product_details_elem = self.driver.find_element_by_xpath(
             "//table[contains(@id, 'productDetails_detailBullets_sections1')]"
@@ -267,4 +281,5 @@ class AmazonCategory(Driver):
 
     @classmethod
     def run(cls):
+        """Public method to invoke the category scraping."""
         cls()._check_categories()

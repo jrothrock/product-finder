@@ -1,12 +1,10 @@
+"""Used locally for starting the finder application."""
 import application.app as app
 
 
-def run_application():
-    app.start()
-
-
 def main():
-    run_application()
+    """Will start the Flask application."""
+    app.start()
 
 
 if __name__ == "__main__":

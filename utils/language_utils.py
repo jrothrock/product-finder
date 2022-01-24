@@ -1,3 +1,4 @@
+"""Language utils module. Used for various language parsings."""
 import re
 
 import nltk
@@ -5,6 +6,7 @@ from IPython import embed
 
 
 def _get_high_frequency_nouns(text):
+    """Get the highest frequency pronouns and nouns in a text string."""
     stop_words = set(nltk.corpus.stopwords.words("english"))
     word_tokens = nltk.word_tokenize(text)
     filtered_sentence = []
@@ -20,6 +22,7 @@ def _get_high_frequency_nouns(text):
 
 
 def get_important_title_words(title, description):
+    """Get the most important nouns in the title and description text bodies."""
     high_frequency_description = _get_high_frequency_nouns(description)
     high_frequency_title = _get_high_frequency_nouns(title)
     potential_list = list(
@@ -32,6 +35,7 @@ def get_important_title_words(title, description):
 
 
 def get_dimensions(description):
+    """Get the length, width, height and measurement (unit) from a body of text."""
     dimensions_regex = re.search(
         "([\d]+\.?[\d]?[\d]?)\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)",
         description,
@@ -61,6 +65,7 @@ def get_dimensions(description):
 
 
 def get_weight(description):
+    """Get the weight and measurement (unit) from a body of text."""
     weight_regex = re.search(
         "(Weight|weight).+?([\d]+[\.]?[\d]?[\d]?)\s?(kg|g|lb|oz|pound|ounce)",
         description,
@@ -75,6 +80,7 @@ def get_weight(description):
 
 
 def get_unit_discounts(text):
+    """Get the discounts applicable for the item when higher quantities ordered."""
     discounts_regex = re.search(
         ".*?([0-9]+)(%)?.*\(([0-9]+) (pieces|lots).*", text, re.IGNORECASE
     )
@@ -91,6 +97,7 @@ def get_unit_discounts(text):
 
 
 def get_units_available(text):
+    """Get the units available for the paricular item / body of text."""
     available_regex = re.search(".*?([0-9]+).*", text, re.IGNORECASE)
     if available_regex:
         return int(available_regex.group(1))

@@ -1,3 +1,4 @@
+"""Utility module used for converting various units."""
 UNIT_CONVERSION_DIMENSIONS = {"cm": 2.54, "mm": 25.4, "in": 1}
 UNIT_CONVERSION_WEIGHT = {
     "g": 453.592,
@@ -10,10 +11,12 @@ UNIT_CONVERSION_WEIGHT = {
 
 
 def convert_to_inches(value, unit):
+    """Convert common measurement units to inches."""
     divisor = UNIT_CONVERSION_DIMENSIONS[unit.lower()]
     return value / divisor
 
 
 def convert_to_pounds(value, unit):
+    """Convert common weight measurement units to pounds."""
     divisor = UNIT_CONVERSION_WEIGHT[unit.lower()]
     return value / divisor

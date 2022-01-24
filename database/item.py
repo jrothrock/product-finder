@@ -1,3 +1,4 @@
+"""Item module which holds procedures commonly used when creating item records."""
 import logging
 
 import redis
@@ -10,11 +11,15 @@ from database.db import Item as ItemDB, Database as db
 
 
 class Item(db):
+    """Class which holds procedures commonly used when creating item records."""
+
     def __init__(self):
+        """Instantiate database communication and Redis."""
         super().__init__()
         self.redis = redis.Redis()
 
     def find_or_create(self, **kwargs):
+        """Find or creates an item record based on the title."""
         try:
             item = (
                 self.session.query(ItemDB)
@@ -27,6 +32,7 @@ class Item(db):
         return item
 
     def new(self, **kwargs):
+        """Create an item recored."""
         dimensions_in_inches = self._dimensions(kwargs["dimensions"])
         weight = self._weight_in_pounds(kwargs["weight"])
         try:
@@ -65,6 +71,7 @@ class Item(db):
 
     # Need to save dimensions as inches
     def _dimensions(self, values):
+        """Normalize and convert dimensions when creating an item record."""
         # TODO investigate better regex to pull measurements
         if (
             values == None
@@ -89,6 +96,7 @@ class Item(db):
         }
 
     def _weight_in_pounds(self, values):
+        """Normalize and convert weight when creating an item record."""
         if values["weight"] == None or values["measurement"] == None:
             return 0
 
@@ -97,6 +105,7 @@ class Item(db):
         )
 
     def _add_to_redis_queue(self, new_item):
+        """Add item record id to Redis to be processed for Amazon fees or calculations."""
         if (
             new_item.length != 0
             and new_item.width != 0

@@ -1,4 +1,4 @@
-"""add hidden column to item and category table
+"""add hidden column to item and category table.
 
 Revision ID: 1b284f077aac
 Revises: 
@@ -17,10 +17,12 @@ depends_on = None
 
 
 def upgrade():
+    """Create hidden fields for category and item records."""
     op.add_column("category", sa.Column("hidden", sa.Boolean))
     op.add_column("item", sa.Column("hidden", sa.Boolean))
 
 
 def downgrade():
+    """Remove hidden fields for category and item records."""
     op.drop_column("category", "hidden")
     op.drop_column("item", "hidden")

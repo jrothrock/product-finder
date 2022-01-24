@@ -1,3 +1,4 @@
+"""Module for scraping number of shopify stores for a particular category."""
 import time
 import re
 import logging
@@ -11,16 +12,21 @@ from database.db import Database, Category as CategoryDB
 
 
 class ShopifyCategory(Driver):
+    """Class that holds procedures for scraping Shopify store counts."""
+
     def __init__(self):
+        """Instantiate Selenium Driver and Redis."""
         super().__init__()
         self.redis = redis.Redis()
 
     def _check_categories(self):
+        """Check the Shopify category queue and process categories."""
         category_ids = self.redis.lrange("queue:category:shopify", 0, -1)
         self.redis.delete("queue:category:shopify")
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):
+        """Process the shopify categories."""
         for category_id in category_ids:
             try:
                 self._get_shopify(category_id)
@@ -33,6 +39,7 @@ class ShopifyCategory(Driver):
                 pass
 
     def _get_shopify(self, category_id):
+        """Pull the shopify store count for a particular category from Google."""
         category = Database().session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
         self.driver.get(
@@ -55,9 +62,10 @@ class ShopifyCategory(Driver):
         session.commit()
         session.close()
 
-    def _get_number_of_sites(self, number_of_sites_elem):
+    def _get_number_of_sites(self, number_of_sites_elem_text):
+        """Get integer number of stores from text body."""
         return int(
-            re.search("About (.+) results", number_of_sites_elem)
+            re.search("About (.+) results", number_of_sites_elem_text)
             .group(1)
             .strip()
             .replace(",", "")
@@ -65,4 +73,5 @@ class ShopifyCategory(Driver):
 
     @classmethod
     def run(cls):
+        """Public method for scraping Shopify store count for category."""
         cls()._check_categories()

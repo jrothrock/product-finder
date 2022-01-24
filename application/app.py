@@ -1,3 +1,4 @@
+"""Module that creates Flask app and sets up routing."""
 import nltk
 from flask import Flask
 
@@ -32,13 +33,15 @@ app.add_url_rule(
     methods=["POST"],
 )
 
-
+# TODO: Investigate moving this.
 def install_requirements():
+    """Install necessary nltk packages used for language utils."""
     nltk.download("stopwords")
     nltk.download("punkt")
     nltk.download("averaged_perceptron_tagger")
 
 
 def start():
+    """Easy to use interface for download needed packages and starting flask app."""
     install_requirements()
     app.run()

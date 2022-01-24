@@ -1,3 +1,4 @@
+"""Module for scraping AmazonFees -- Category and Item."""
 import time
 import logging
 
@@ -11,16 +12,21 @@ from database.db import Database, Item as ItemDB, Category as CategoryDB
 
 
 class AmazonFee(Driver):
+    """Class that holds procedures for scraping Amazon fees."""
+
     def __init__(self):
+        """Instantiate Selenium Driver and Redis."""
         super().__init__()
         self.redis = redis.Redis()
 
     def _check_categories(self):
+        """Check the Amazon category fees queue and process the categories."""
         category_ids = self.redis.lrange("queue:category:amazon:fees", 0, -1)
         self.redis.delete("queue:category:amazon:fees")
         self._process_record(category_ids, CategoryDB)
 
     def _check_items(self):
+        """Check the Amazon item fees queue and process the items."""
         item_ids = self.redis.lrange("queue:item:amazon:fees", 0, -1)
         self.redis.delete("queue:item:amazon:fees")
         self._process_record(item_ids, ItemDB)
@@ -38,6 +44,7 @@ class AmazonFee(Driver):
                 pass
 
     def _get_amazon(self, record_id, db_klass):
+        """Scrape the amazon page for a particular category or item."""
         time.sleep(1)
         record = Database().session.query(db_klass).get(int(record_id))
         self.driver.get(
@@ -119,8 +126,10 @@ class AmazonFee(Driver):
 
     @classmethod
     def run_item_fees(cls):
+        """Public method to instantiate scraping Amazon fees for items."""
         cls()._check_items()
 
     @classmethod
     def run_category_fees(cls):
+        """Public method to instantiate scraping Amazon fees for categories."""
         cls()._check_categories()

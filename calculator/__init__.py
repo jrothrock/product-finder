@@ -1,3 +1,4 @@
+"""Subpackage for running profitability calculations on category and item records."""
 import logging
 
 import redis
@@ -27,15 +28,20 @@ GROSS_MARGIN_PERCENTAGE = 0.4
 
 
 class CategoryCalculator:
+    """Class which holds procedures for running category profitability calculations."""
+
     def __init__(self):
+        """Instantiate Redis."""
         self.redis = redis.Redis()
 
     def _check_categories(self):
+        """Check for categories that need to have calculations performed."""
         category_ids = self.redis.lrange("queue:category:calculator", 0, -1)
         self.redis.delete("queue:category:calculator")
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):
+        """Process categories and perform profitability calculations."""
         for category_id in category_ids:
             try:
                 self._calculate_category(category_id)
@@ -46,6 +52,7 @@ class CategoryCalculator:
                 pass
 
     def _calculate_category(self, category_id):
+        """Perform calculations on a category."""
         category = Database().session.query(CategoryDB).get(int(category_id))
         calculated_shipping_cost = self._calculate_shipping_cost(category_id)
         # will probably need to circle back on this. Probably too low of a breakeven.
@@ -69,6 +76,7 @@ class CategoryCalculator:
         session.close()
 
     def _calculate_shipping_cost(self, category_id):
+        """Calculate shipping costs for a particular category."""
         records = (
             Database()
             .session.query(ItemDB, CategoryDB)
@@ -87,19 +95,25 @@ class CategoryCalculator:
 
     @classmethod
     def run(cls):
+        """Public method for running item calculations on processable categories."""
         cls()._check_categories()
 
 
 class ItemCalculator:
+    """Class which holds procedures for running item profitability calculations."""
+
     def __init__(self):
+        """Instantiate Redis."""
         self.redis = redis.Redis()
 
     def _check_items(self):
+        """Check for items that need to have calculations performed."""
         item_ids = self.redis.lrange("queue:item:calculator", 0, -1)
         self.redis.delete("queue:item:calculator")
         self._process_items(item_ids)
 
     def _process_items(self, item_ids):
+        """Process items and perform profitability calculations."""
         for item_id in item_ids:
             try:
                 self._calculate_item(item_id)
@@ -110,6 +124,7 @@ class ItemCalculator:
                 pass
 
     def _calculate_item(self, item_id):
+        """Perform calculations on an item."""
         item = Database().session.query(ItemDB).get(int(item_id))
         break_even_sale_price = item.price + item.shipping_price
         break_even_amazon_sale_price = (
@@ -127,17 +142,21 @@ class ItemCalculator:
 
     @classmethod
     def run(cls):
+        """Public method for running item calculations on processable items."""
         cls()._check_items()
 
 
 def calculate_categories():
+    """Easy to use interface for running category calculations."""
     CategoryCalculator.run()
 
 
 def calculate_items():
+    """Easy to use interface for running item calculations."""
     ItemCalculator.run()
 
 
 def calculate_all():
+    """Easy to use interface for running all calculations."""
     calculate_categories()
     calculate_items()

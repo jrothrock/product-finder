@@ -1,0 +1,1 @@
+"""Package for finding potential profitable products."""

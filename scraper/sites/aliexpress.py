@@ -1,3 +1,4 @@
+"""Module for scraping Aliexpress products."""
 import re
 import time
 import logging
@@ -14,12 +15,16 @@ from database.item import Item as ItemModel
 
 
 class Aliexpress(Driver):
+    """Class that holds procedures for scraping Aliexpress products."""
+
     def __init__(self):
+        """Instantiate Selenium Driver and Redis. Cache category and item models."""
         super().__init__()
         self.category = CategoryModel()
         self.item = ItemModel()
 
     def _scrape_pages(self):
+        """Scrape Aliexpress pages and pull prductk links."""
         category_mappings = mappings.get_category_mappings()
         category_mapping_keys = category_mappings.get("categories", {}).keys()
         for category_id in category_mapping_keys:
@@ -68,6 +73,7 @@ class Aliexpress(Driver):
                 self.driver.find_element_by_class_name("next-next").click()
 
     def _scrape_page(self, link, amazon_category):
+        """Scrape one of the product pages and pull neccessary values."""
         time.sleep(1)
         self.driver.get(link)
         self.driver.execute_script("window.scrollTo(0,1000)")
@@ -137,6 +143,7 @@ class Aliexpress(Driver):
         )
 
     def _scrape_price(self):
+        """Scrape the price for a particular product."""
         price_element = None
         if len(self.driver.find_elements(By.CLASS_NAME, "product-price-value")) > 0:
             price_element = self.driver.find_element_by_class_name(
@@ -154,6 +161,7 @@ class Aliexpress(Driver):
             return -1
 
     def _scrape_shipping_price(self, ten_units=False):
+        """Check the shipping prices for a particular product/page."""
         if ten_units == True:
             for _x in range(9):
                 self.driver.find_element_by_class_name(
@@ -174,4 +182,5 @@ class Aliexpress(Driver):
 
     @classmethod
     def run(cls):
+        """Public method to instantiate scraping of Aliexpress products."""
         cls()._scrape_pages()
