@@ -3,7 +3,6 @@ import time
 import logging
 
 import redis
-from IPython import embed
 
 import utils.system as system
 import utils.mappings as mappings

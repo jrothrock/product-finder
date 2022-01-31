@@ -5,7 +5,6 @@ import logging
 import statistics
 
 import redis
-from IPython import embed
 
 import utils.system as system
 import utils.language_utils as language_utils
@@ -206,8 +205,10 @@ class AmazonCategory(Driver):
                 )
 
         category_dimensions = [
-            l * w * h
-            for l, w, h in zip(category_lengths, category_widths, category_heights)
+            length * width * height
+            for length, width, height in zip(
+                category_lengths, category_widths, category_heights
+            )
         ]
 
         amazon_average_length = (

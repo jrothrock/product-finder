@@ -2,7 +2,6 @@
 import re
 
 import nltk
-from IPython import embed
 
 
 def _get_high_frequency_nouns(text):
@@ -87,11 +86,11 @@ def get_unit_discounts(text):
     if discounts_regex:
         discount = (
             0.0
-            if discounts_regex.group(2) != "%" and discounts_regex.group(1) == None
+            if discounts_regex.group(2) != "%" and discounts_regex.group(1) is None
             else (float(discounts_regex.group(1)) / 100)
         )
         discount_amount = (
-            0 if discounts_regex.group(3) == None else int(discounts_regex.group(3))
+            0 if discounts_regex.group(3) is None else int(discounts_regex.group(3))
         )
         return {"discount": discount, "discount_amount": discount_amount}
 

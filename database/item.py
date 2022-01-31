@@ -3,7 +3,6 @@ import logging
 
 import redis
 from sqlalchemy.orm.exc import NoResultFound
-from IPython import embed
 
 import utils.system as system
 import utils.unit_conversions as unit_conversions
@@ -74,8 +73,8 @@ class Item(db):
         """Normalize and convert dimensions when creating an item record."""
         # TODO investigate better regex to pull measurements
         if (
-            values == None
-            or values["measurement"] == None
+            values is None
+            or values["measurement"] is None
             or values["measurement"] == ""
         ):
             return {"length": 0, "width": 0, "height": 0}
@@ -97,7 +96,7 @@ class Item(db):
 
     def _weight_in_pounds(self, values):
         """Normalize and convert weight when creating an item record."""
-        if values["weight"] == None or values["measurement"] == None:
+        if values["weight"] is None or values["measurement"] is None:
             return 0
 
         return unit_conversions.convert_to_pounds(

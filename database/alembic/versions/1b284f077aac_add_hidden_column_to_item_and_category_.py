@@ -1,7 +1,7 @@
 """add hidden column to item and category table.
 
 Revision ID: 1b284f077aac
-Revises: 
+Revises:
 Create Date: 2022-01-17 19:38:16.033315
 
 """

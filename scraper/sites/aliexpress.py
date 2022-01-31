@@ -4,7 +4,6 @@ import time
 import logging
 
 import selenium
-from IPython import embed
 
 import utils.system as system
 import utils.language_utils as language_utils
@@ -162,7 +161,7 @@ class Aliexpress(Driver):
 
     def _scrape_shipping_price(self, ten_units=False):
         """Check the shipping prices for a particular product/page."""
-        if ten_units == True:
+        if ten_units is True:
             for _x in range(9):
                 self.driver.find_element_by_class_name(
                     "next-after"

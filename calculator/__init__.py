@@ -2,7 +2,6 @@
 import logging
 
 import redis
-from IPython import embed
 
 import utils.system as system
 from database.db import Database, Category as CategoryDB, Item as ItemDB

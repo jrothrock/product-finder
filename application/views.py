@@ -3,7 +3,6 @@ import math
 
 from flask import render_template, jsonify, request
 from sqlalchemy import text
-from IPython import embed
 
 import tasks
 from database.db import Database, Item as ItemDB, Category as CategoryDB, func

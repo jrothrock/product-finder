@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "finder"
+version = "0.1.0"
+description = "Library to help find potentially profitable products"
+authors = ["Jack Rothrock <jrothrock14@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+alembic = "^1.7"
+celery = "^5.2"
+Flask = "^2.0"
+nltk = "^3.6"
+PyYAML = "^6.0"
+redis = "^3.5"
+selenium = "^3.141"
+SQLAlchemy = "^1.4"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1"
+flake8 = "^4.0"
+ipython = "^7.27"
+pydocstyle = "^6.1"
+pytest = "^6.2"
+toml = "^0.10"
+
+[tool.poetry.scripts]
+audit = "poetry.scripts:audit"
+start = "poetry.scripts:start"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

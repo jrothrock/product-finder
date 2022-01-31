@@ -3,7 +3,7 @@
 import os
 
 import sqlalchemy as db
-from sqlalchemy import (
+from sqlalchemy import (  # noqa: F401
     func,
     Column,
     create_engine,
@@ -15,7 +15,6 @@ from sqlalchemy import (
     Boolean,
 )
 from sqlalchemy.orm import registry, sessionmaker
-from IPython import embed
 
 mapper_registry = registry()
 
@@ -89,17 +88,15 @@ class Database:
     def __init__(self):
         """Instantiate communication with the database."""
         self.db = db
-        db_password = os.environ.get("DB_PASSWORD")
         db_username = os.environ.get("DB_USERNAME")
-        if db_password:
+        db_password = os.environ.get("DB_PASSWORD")
+        if db_username:
             engine = (
                 f"postgresql://{db_username}:{db_password}@localhost:5432/scraperdb"
             )
         else:
             engine = "sqlite:///database/test.sqlite"
-        self.engine = create_engine(
-            "sqlite:///database/test.sqlite", connect_args={"check_same_thread": False}
-        )
+        self.engine = create_engine(engine, connect_args={"check_same_thread": False})
         Base = mapper_registry.generate_base()
         Base.metadata.create_all(
             self.engine, Base.metadata.tables.values(), checkfirst=True

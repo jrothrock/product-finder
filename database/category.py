@@ -1,7 +1,6 @@
 """Category module which holds procedures commonly used when creating category records."""
 import redis
 from sqlalchemy.orm.exc import NoResultFound
-from IPython import embed
 
 from database.db import Category as CategoryDB, Database as db
 
@@ -48,7 +47,7 @@ class Category(db):
     def _create_title(self, values):
         """Create the title for the record."""
         # TODO need to investigate why values is type None
-        if values == None or len(values) == 0:
+        if values is None or len(values) == 0:
             return ""
         else:
             values.sort()

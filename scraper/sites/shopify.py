@@ -4,7 +4,6 @@ import re
 import logging
 
 import redis
-from IPython import embed
 
 import utils.system as system
 from scraper.core.drivers import Driver

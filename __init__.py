@@ -1,1 +1,1 @@
-"""Package for finding potential profitable products."""
+"""Package for finding potentially profitable products."""

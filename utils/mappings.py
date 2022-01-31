@@ -2,7 +2,7 @@
 import os
 
 import yaml
-from IPython import embed
+
 
 # Not super performant. May want to revisit.
 def get_category_mappings():

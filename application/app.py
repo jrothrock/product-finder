@@ -33,6 +33,7 @@ app.add_url_rule(
     methods=["POST"],
 )
 
+
 # TODO: Investigate moving this.
 def install_requirements():
     """Install necessary nltk packages used for language utils."""
