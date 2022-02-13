@@ -4,7 +4,9 @@ import logging
 import redis
 
 import utils.system as system
-from database.db import Database, Category as CategoryDB, Item as ItemDB
+from database.db import Category as CategoryDB
+from database.db import Database
+from database.db import Item as ItemDB
 
 # AD_CONVERSION_PERCENTAGE = 0.02
 # LOW_CPC_DOLLARS = 0.1

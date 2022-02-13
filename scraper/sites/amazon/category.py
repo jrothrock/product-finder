@@ -1,16 +1,17 @@
 """Module which scrapes the Amazon category."""
-import time
-import re
 import logging
+import re
 import statistics
+import time
 
 import redis
 
-import utils.system as system
 import utils.language_utils as language_utils
+import utils.system as system
 import utils.unit_conversions as unit_conversions
+from database.db import Category as CategoryDB
+from database.db import Database
 from scraper.core.drivers import Driver
-from database.db import Database, Category as CategoryDB
 
 
 class AmazonCategory(Driver):

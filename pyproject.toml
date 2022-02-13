@@ -23,6 +23,17 @@ ipython = "^7.27"
 pydocstyle = "^6.1"
 pytest = "^6.2"
 toml = "^0.10"
+isort = "^5.10.1"
+
+[tool.black]
+exclude = ".venv"
+
+[tool.isort]
+profile = "black"
+skip_glob = [".venv/*"]
+
+[tool.pydocstyle]
+match-dir='[^\.venv].*'
 
 [tool.poetry.scripts]
 audit = "poetry.scripts:audit"

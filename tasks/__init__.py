@@ -2,8 +2,8 @@
 from celery import Celery
 from celery.schedules import crontab
 
-import scraper
 import calculator
+import scraper
 
 app = Celery("tasks", broker="redis://localhost:6379/0")
 

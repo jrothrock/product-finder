@@ -3,16 +3,16 @@
 import os
 
 import sqlalchemy as db
-from sqlalchemy import (  # noqa: F401
-    func,
+from sqlalchemy import Boolean  # noqa: F401
+from sqlalchemy import func  # noqa: F401
+from sqlalchemy import (
     Column,
-    create_engine,
-    MetaData,
     Float,
-    String,
     ForeignKey,
     Integer,
-    Boolean,
+    MetaData,
+    String,
+    create_engine,
 )
 from sqlalchemy.orm import registry, sessionmaker
 

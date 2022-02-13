@@ -1,16 +1,16 @@
 """Module for scraping Aliexpress products."""
+import logging
 import re
 import time
-import logging
 
 import selenium
 
-import utils.system as system
 import utils.language_utils as language_utils
 import utils.mappings as mappings
-from scraper.core.drivers import Driver, WebDriverWait, EC, By
+import utils.system as system
 from database.category import Category as CategoryModel
 from database.item import Item as ItemModel
+from scraper.core.drivers import EC, By, Driver, WebDriverWait
 
 
 class Aliexpress(Driver):

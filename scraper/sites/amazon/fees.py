@@ -1,13 +1,15 @@
 """Module for scraping AmazonFees -- Category and Item."""
-import time
 import logging
+import time
 
 import redis
 
-import utils.system as system
 import utils.mappings as mappings
+import utils.system as system
+from database.db import Category as CategoryDB
+from database.db import Database
+from database.db import Item as ItemDB
 from scraper.core.drivers import Driver
-from database.db import Database, Item as ItemDB, Category as CategoryDB
 
 
 class AmazonFee(Driver):
