@@ -45,7 +45,7 @@ def install_requirements():
 def start():
     """DEV: Easy to use interface to download needed requirements and start flask app."""
     install_requirements()
-    app.run(host='0.0.0.0')
+    app.run(host="0.0.0.0")
 
 
 def wsgi():
