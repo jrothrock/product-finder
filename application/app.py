@@ -43,6 +43,12 @@ def install_requirements():
 
 
 def start():
-    """Easy to use interface for download needed packages and starting flask app."""
+    """DEV: Easy to use interface to download needed requirements and start flask app."""
     install_requirements()
-    app.run()
+    app.run(host='0.0.0.0')
+
+
+def wsgi():
+    """PROD: Easy to use interface to download needed requirements and start flask app."""
+    install_requirements()
+    return app
