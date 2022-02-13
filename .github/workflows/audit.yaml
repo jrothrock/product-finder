@@ -25,11 +25,11 @@ jobs:
     - name: Check Pydocs have been added
       run: |
         # stop the build if there are Pydoc style missing
-        pydocstyle --count
+        poetry run python -m pydocstyle --count
     - name: Lint with flake8
       run: |
         # stop the build if there are flake errors
-        flake8 . --count --ignore=W605,W503,W504,E501 --max-complexity=10 --statistics
+        poetry run python -m flake8 . --count --ignore=W605,W503,W504,E501 --max-complexity=10 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        poetry run python -m pytest
