@@ -2,7 +2,8 @@
 import redis
 from sqlalchemy.orm.exc import NoResultFound
 
-from database.db import Category as CategoryDB, Database as db
+from database.db import Category as CategoryDB
+from database.db import Database as db
 
 
 class Category(db):

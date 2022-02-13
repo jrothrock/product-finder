@@ -1,11 +1,14 @@
 """Module for adding logic to the various routes."""
 import math
 
-from flask import render_template, jsonify, request
+from flask import jsonify, render_template, request
 from sqlalchemy import text
 
 import tasks
-from database.db import Database, Item as ItemDB, Category as CategoryDB, func
+from database.db import Category as CategoryDB
+from database.db import Database
+from database.db import Item as ItemDB
+from database.db import func
 
 PAGE_SIZE = 50
 

@@ -1,6 +1,6 @@
 """Util module for handling system level utilities."""
-import sys
 import os
+import sys
 
 
 def exit():

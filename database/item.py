@@ -6,7 +6,8 @@ from sqlalchemy.orm.exc import NoResultFound
 
 import utils.system as system
 import utils.unit_conversions as unit_conversions
-from database.db import Item as ItemDB, Database as db
+from database.db import Database as db
+from database.db import Item as ItemDB
 
 
 class Item(db):

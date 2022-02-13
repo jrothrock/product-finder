@@ -1,7 +1,7 @@
 """Subpack that holds all of the modules used for scraping various sites."""
 from scraper.sites.aliexpress import Aliexpress
-from scraper.sites.amazon.fees import AmazonFee
 from scraper.sites.amazon.category import AmazonCategory
+from scraper.sites.amazon.fees import AmazonFee
 from scraper.sites.shopify import ShopifyCategory
 
 

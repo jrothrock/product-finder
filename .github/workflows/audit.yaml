@@ -22,14 +22,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install poetry flake8 pytest
         if [ -f poetry.lock ]; then poetry install; fi
+    - name: Check has black formatting
+      run: |
+        # stop the build if black formatting not applied
+        poetry run python -m black . --check
+    - name: Check imports are sorted correctly
+      run: |
+        # stop the build if there are isort errors
+        poetry run python -m isort . --check
     - name: Check Pydocs have been added
       run: |
         # stop the build if there are Pydoc style missing
-        poetry run python -m pydocstyle --count --match-dir='[^\.venv].*'
+        poetry run python -m pydocstyle --count
     - name: Lint with flake8
       run: |
         # stop the build if there are flake errors
-        poetry run python -m flake8 . --exclude=.venv --count --ignore=W605,W503,W504,E501 --max-complexity=10 --statistics
+        poetry run python -m flake8 . --count --statistics
     - name: Test with pytest
       run: |
         poetry run python -m pytest

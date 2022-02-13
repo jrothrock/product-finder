@@ -1,13 +1,14 @@
 """Module for scraping number of shopify stores for a particular category."""
-import time
-import re
 import logging
+import re
+import time
 
 import redis
 
 import utils.system as system
+from database.db import Category as CategoryDB
+from database.db import Database
 from scraper.core.drivers import Driver
-from database.db import Database, Category as CategoryDB
 
 
 class ShopifyCategory(Driver):

@@ -2,10 +2,10 @@
 import os
 
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait  # noqa
 from selenium.webdriver.common.by import By  # noqa
-from selenium.webdriver.support import expected_conditions as EC  # noqa
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support import expected_conditions as EC  # noqa
+from selenium.webdriver.support.ui import WebDriverWait  # noqa
 from webdriver_manager.firefox import GeckoDriverManager
 
 
