@@ -104,7 +104,7 @@ class ItemCalculator:
 
     def __init__(self):
         """Instantiate Redis."""
-        self.redis = cache.re
+        self.redis = cache.redis_instance
 
     def _check_items(self):
         """Check for items that need to have calculations performed."""
