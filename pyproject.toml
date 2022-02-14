@@ -16,6 +16,8 @@ redis = "^3.5"
 selenium = "^3.141"
 SQLAlchemy = "^1.4"
 webdriver-manager = "^3.5"
+psycopg2 = "^2.9.3"
+SQLAlchemy-Utils = "^0.38.2"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1"

@@ -4,8 +4,7 @@ import re
 import statistics
 import time
 
-import redis
-
+import cache
 import utils.language_utils as language_utils
 import utils.system as system
 import utils.unit_conversions as unit_conversions
@@ -20,7 +19,7 @@ class AmazonCategory(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = redis.Redis()
+        self.redis = cache.redis_instance
 
     def _check_categories(self):
         """Check the Amazon queue and process the categories."""

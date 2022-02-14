@@ -2,10 +2,11 @@
 from celery import Celery
 from celery.schedules import crontab
 
+import cache
 import calculator
 import scraper
 
-app = Celery("tasks", broker="redis://localhost:6379/0")
+app = Celery("tasks", broker=f"{cache.REDIS_URL}/0")
 
 
 @app.on_after_configure.connect

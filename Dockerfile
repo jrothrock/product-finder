@@ -1,8 +1,18 @@
 # pull official base image
-FROM python:3.10.2-slim-buster as base
+FROM python:3.10.2-buster as base
 
 # set work directory
 WORKDIR /usr/src/app
+
+# install postgres dependencies
+RUN apt-get update && apt-get install libpq-dev -y
+
+# install firefox and geckodriver
+RUN apt-get install firefox-esr -y
+RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz
+RUN tar -xvzf geckodriver*
+RUN chmod +x geckodriver
+RUN mv geckodriver /usr/local/bin/
 
 
 FROM base as poetry

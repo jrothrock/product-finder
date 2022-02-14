@@ -2,8 +2,7 @@
 import logging
 import time
 
-import redis
-
+import cache
 import utils.mappings as mappings
 import utils.system as system
 from database.db import Category as CategoryDB
@@ -18,7 +17,7 @@ class AmazonFee(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = redis.Redis()
+        self.redis = cache.redis_instance
 
     def _check_categories(self):
         """Check the Amazon category fees queue and process the categories."""

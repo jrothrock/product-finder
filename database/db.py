@@ -3,9 +3,9 @@
 import os
 
 import sqlalchemy as db
-from sqlalchemy import Boolean  # noqa: F401
 from sqlalchemy import func  # noqa: F401
 from sqlalchemy import (
+    Boolean,
     Column,
     Float,
     ForeignKey,
@@ -15,6 +15,7 @@ from sqlalchemy import (
     create_engine,
 )
 from sqlalchemy.orm import registry, sessionmaker
+from sqlalchemy_utils import create_database, database_exists
 
 mapper_registry = registry()
 
@@ -44,9 +45,9 @@ class Item:
     weight = Column(Float, default=0.0)
     url = Column(String)
     image_url = Column(String)
-    break_even_sale_price = Column(Float, default=False)
-    break_even_amazon_sale_price = Column(Float, default=False)
-    hidden = Column(Float, default=False)
+    break_even_sale_price = Column(Float, default=0)
+    break_even_amazon_sale_price = Column(Float, default=0)
+    hidden = Column(Boolean, default=False)
 
 
 @mapper_registry.mapped
@@ -78,7 +79,7 @@ class Category:
     number_of_shopify_sites = Column(Integer, default=0)
     average_min_break_even = Column(Float, default=0)
     average_min_break_even_amazon = Column(Float, default=0)
-    hidden = Column(Float, default=False)
+    hidden = Column(Boolean, default=False)
     title_version = Column(Integer, default=1)
 
 
@@ -88,15 +89,15 @@ class Database:
     def __init__(self):
         """Instantiate communication with the database."""
         self.db = db
-        db_username = os.environ.get("DB_USERNAME")
-        db_password = os.environ.get("DB_PASSWORD")
-        if db_username:
-            engine = (
-                f"postgresql://{db_username}:{db_password}@localhost:5432/scraperdb"
-            )
-        else:
-            engine = "sqlite:///database/test.sqlite"
-        self.engine = create_engine(engine, connect_args={"check_same_thread": False})
+        engine = os.environ.get("DATABASE_URL", "sqlite:///database/test.sqlite")
+        conn_args = (
+            {} if os.environ.get("DATABASE_TYPE") else {"check_same_thread": False}
+        )
+
+        self.engine = create_engine(engine, connect_args=conn_args)
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url)
+
         Base = mapper_registry.generate_base()
         Base.metadata.create_all(
             self.engine, Base.metadata.tables.values(), checkfirst=True

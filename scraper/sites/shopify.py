@@ -3,8 +3,7 @@ import logging
 import re
 import time
 
-import redis
-
+import cache
 import utils.system as system
 from database.db import Category as CategoryDB
 from database.db import Database
@@ -17,7 +16,7 @@ class ShopifyCategory(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = redis.Redis()
+        self.redis = cache.redis_instance
 
     def _check_categories(self):
         """Check the Shopify category queue and process categories."""
