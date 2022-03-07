@@ -10,7 +10,7 @@ services:
       - db
       - cache
     environment:
-      - DATABASE_URL=postgresql://hello_flask:hello_flask@db:5432/scraperdb
+      - DATABASE_URL=postgresql://finder:finder@db:5432/scraperdb
       - DATABASE_TYPE=postgres
       - RUN_HEADLESS=True
       - REDIS_URL=redis://cache:6379
@@ -24,7 +24,7 @@ services:
     volumes:
       - worker:/celery
     environment:
-      - DATABASE_URL=postgresql://hello_flask:hello_flask@db:5432/scraperdb
+      - DATABASE_URL=postgresql://finder:finder@db:5432/scraperdb
       - DATABASE_TYPE=postgres
       - RUN_HEADLESS=True
       - REDIS_URL=redis://cache:6379
@@ -39,8 +39,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=hello_flask
-      - POSTGRES_PASSWORD=hello_flask
+      - POSTGRES_USER=finder
+      - POSTGRES_PASSWORD=finder
       - POSTGRES_DB=scraperdb
 
 volumes:

@@ -5,7 +5,7 @@ description = "Library to help find potentially profitable products"
 authors = ["Jack Rothrock <jrothrock14@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.10"
 alembic = "^1.7"
 celery = "^5.2"
 Flask = "^2.0"
@@ -34,6 +34,8 @@ exclude = ".venv"
 [tool.isort]
 profile = "black"
 skip_glob = [".venv/*"]
+quiet = true
+force_single_line = true
 
 [tool.pydocstyle]
 match-dir='[^\.venv].*'

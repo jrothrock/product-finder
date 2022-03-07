@@ -1,8 +1,20 @@
+# Ignore all vscode related files
 .vscode/*
+
+# Ignore Terraform generated files
+*/.terraform*
+*.tfstate
+*.tfstate.*
+
+# Ignore environment
+.venv
+
+# Ignore unneeded application generated items
 *.pyc
 *.log
-.venv
 *.sqlite
-.DS_STORE
 dump.rdb
 celerybeat-schedule
+
+# Ignore OSx generated files
+.DS_STORE
