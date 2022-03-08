@@ -13,4 +13,5 @@ resource "digitalocean_droplet" "finder" {
   region = "sfo1"
   size   = "s-1vcpu-1gb"
   ssh_keys = var.ssh_keys
+  ipv6 = true
 }

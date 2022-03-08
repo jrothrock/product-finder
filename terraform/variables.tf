@@ -14,3 +14,8 @@ variable "firewall_name" {
   type = string
   description = "Name for the firewall."
 }
+
+variable "subdomain_name" {
+  type = string
+  description = "Name of the subdomain."
+}

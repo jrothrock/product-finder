@@ -7,20 +7,27 @@ terraform {
   }
 }
 
-module "ssh_key" {
-  source = "./modules/ssh_key"
+module "digitalocean_ssh_key" {
+  source = "./modules/digitalocean_ssh_keys"
 }
 
-module "droplet" {
-  source = "./modules/droplet"
+module "digitalocean_droplet" {
+  source = "./modules/digitalocean_droplet"
 
   droplet_name = var.droplet_name
-  ssh_keys = [module.ssh_key.fingerprint]
+  ssh_keys = [module.digitalocean_ssh_key.personal_fingerprint, module.digitalocean_ssh_key.deploy_fingerprint]
 }
 
-module "firewall" {
-  source = "./modules/firewall"
+module "digitalocean_firewall" {
+  source = "./modules/digitalocean_firewall"
 
   firewall_name = var.firewall_name
-  droplet_ids = [module.droplet.droplet_id]
+  droplet_ids = [module.digitalocean_droplet.droplet_id]
+}
+
+module "digitalocean_dns_record" {
+  source = "./modules/digitalocean_dns_record"
+
+  droplet_ipv4 = module.digitalocean_droplet.droplet_ipv4
+  subdomain_name = var.subdomain_name
 }
