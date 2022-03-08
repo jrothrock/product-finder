@@ -10,7 +10,10 @@ import utils.mappings as mappings
 import utils.system as system
 from database.category import Category as CategoryModel
 from database.item import Item as ItemModel
-from scraper.core.drivers import EC, By, Driver, WebDriverWait
+from scraper.core.drivers import EC
+from scraper.core.drivers import By
+from scraper.core.drivers import Driver
+from scraper.core.drivers import WebDriverWait
 
 
 class Aliexpress(Driver):

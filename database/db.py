@@ -3,19 +3,19 @@
 import os
 
 import sqlalchemy as db
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import Float
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy import MetaData
+from sqlalchemy import String
+from sqlalchemy import create_engine
 from sqlalchemy import func  # noqa: F401
-from sqlalchemy import (
-    Boolean,
-    Column,
-    Float,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    create_engine,
-)
-from sqlalchemy.orm import registry, sessionmaker
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy.orm import registry
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import create_database
+from sqlalchemy_utils import database_exists
 
 mapper_registry = registry()
 

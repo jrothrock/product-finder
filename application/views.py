@@ -1,7 +1,9 @@
 """Module for adding logic to the various routes."""
 import math
 
-from flask import jsonify, render_template, request
+from flask import jsonify
+from flask import render_template
+from flask import request
 from sqlalchemy import text
 
 import tasks
