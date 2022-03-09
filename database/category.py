@@ -1,7 +1,7 @@
 """Category module which holds procedures commonly used when creating category records."""
 from sqlalchemy.orm.exc import NoResultFound
 
-import cache
+import broker
 from database.db import Category as CategoryDB
 from database.db import Database as db
 
@@ -12,7 +12,7 @@ class Category(db):
     def __init__(self):
         """Instantiate database communication and Redis."""
         super().__init__()
-        self.redis = cache.redis_instance
+        self.redis = broker.redis_instance
 
     def find_or_create(self, **kwargs):
         """Find or creates a category record based on the title."""

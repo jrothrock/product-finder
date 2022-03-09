@@ -2,7 +2,7 @@
 import logging
 import time
 
-import cache
+import broker
 import utils.mappings as mappings
 import utils.system as system
 from database.db import Category as CategoryDB
@@ -17,7 +17,7 @@ class AmazonFee(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = cache.redis_instance
+        self.redis = broker.redis_instance
 
     def _check_categories(self):
         """Check the Amazon category fees queue and process the categories."""

@@ -1,7 +1,7 @@
 """Subpackage for running profitability calculations on category and item records."""
 import logging
 
-import cache as cache
+import broker as broker
 import utils.system as system
 from database.db import Category as CategoryDB
 from database.db import Database
@@ -32,7 +32,7 @@ class CategoryCalculator:
 
     def __init__(self):
         """Instantiate Redis."""
-        self.redis = cache.redis_instance
+        self.redis = broker.redis_instance
 
     def _check_categories(self):
         """Check for categories that need to have calculations performed."""
@@ -104,7 +104,7 @@ class ItemCalculator:
 
     def __init__(self):
         """Instantiate Redis."""
-        self.redis = cache.redis_instance
+        self.redis = broker.redis_instance
 
     def _check_items(self):
         """Check for items that need to have calculations performed."""

@@ -3,7 +3,7 @@ import logging
 
 from sqlalchemy.orm.exc import NoResultFound
 
-import cache
+import broker
 import utils.system as system
 import utils.unit_conversions as unit_conversions
 from database.db import Database as db
@@ -16,7 +16,7 @@ class Item(db):
     def __init__(self):
         """Instantiate database communication and Redis."""
         super().__init__()
-        self.redis = cache.redis_instance
+        self.redis = broker.redis_instance
 
     def find_or_create(self, **kwargs):
         """Find or creates an item record based on the title."""
