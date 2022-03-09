@@ -14,4 +14,5 @@ resource "digitalocean_droplet" "finder" {
   size   = "s-1vcpu-1gb"
   ssh_keys = var.ssh_keys
   ipv6 = true
+  user_data = file("{path.root}/../../production.sh")
 }
