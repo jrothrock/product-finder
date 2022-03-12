@@ -52,7 +52,7 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/finder.key
+          echo ${{ env.SSH_KEY }} > ~/.ssh/finder.key
           chmod 600 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
           Host finder
