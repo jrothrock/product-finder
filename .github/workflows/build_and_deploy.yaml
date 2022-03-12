@@ -56,7 +56,7 @@ jobs:
           echo "${{ env.SSH_KEY }}" > ~/.ssh/finder.key
           chmod 400 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
-          Host finder
+          Host finder_new
             HostName ${{ env.SSH_HOST }}
             User ${{ env.SSH_USER }}
             IdentityFile ~/.ssh/finder.key
@@ -68,10 +68,10 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Create directory
-        run: ssh finder 'mkdir -p ~/deploys/${{ env.CURRENT_TIME }}'
+        run: ssh finder_new 'mkdir -p ~/deploys/${{ env.CURRENT_TIME }}'
 
       - name: Copy code to server
-        run: rsync -avz ./ finder:~/deploys/${{ env.CURRENT_TIME }}/
+        run: rsync -avz ./ finder_new:~/deploys/${{ env.CURRENT_TIME }}/
       
       - name: Stop Docker containers
         run: docker stop $(docker ps -q)
@@ -80,5 +80,5 @@ jobs:
         run: docker-compose up -d
 
       - name: Remove Oldest Directory If More Than 5
-        run: ssh finder 'cd deploys; if [[ (ls | wc -l) -gt 5 ]]; then rm -rf $(ls -t1 | tail -n 1); fi'
+        run: ssh finder_new 'cd deploys; if [[ (ls | wc -l) -gt 5 ]]; then rm -rf $(ls -t1 | tail -n 1); fi'
   
