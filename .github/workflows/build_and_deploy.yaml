@@ -53,12 +53,12 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "${{ env.SSH_KEY }}" > ~/.ssh/finder.key
+          echo "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZWQyNTUxOQAAACAOeQOGhd+1L5zhL0FEtFQznHk/BuNWk3bXouDZ9y7XQwAAAJiYpnoQmKZ6EAAAAAtzc2gtZWQyNTUxOQAAACAOeQOGhd+1L5zhL0FEtFQznHk/BuNWk3bXouDZ9y7XQwAAAEDOK9jdfFvcIZIZCUuKe8cLSUsulDUtGaX9V6GaKwHA/w55A4aF37UvnOEvQUS0VDOceT8G41aTdtei4Nn3LtdDAAAAFWpyb3Rocm9jazE0QGdtYWlsLmNvbQ==" > ~/.ssh/finder.key
           chmod 400 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
           Host finder_new
-            HostName ${{ env.SSH_HOST }}
-            User ${{ env.SSH_USER }}
+            HostName 198.199.100.147
+            User deploy
             IdentityFile ~/.ssh/finder.key
             StrictHostKeyChecking no
           END
