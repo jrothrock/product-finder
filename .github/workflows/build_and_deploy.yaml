@@ -68,7 +68,7 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: View output
-        run: cat ~/.ssh/config
+        run: cat ~/.ssh/finder.key
 
       - name: Create directory
         run: ssh finder 'mkdir -p ~/deploys/${{ env.CURRENT_TIME }}'
