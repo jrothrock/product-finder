@@ -18,3 +18,6 @@ celerybeat-schedule
 
 # Ignore OSx generated files
 .DS_STORE
+
+# The host file created when outputting the terraform droplet ip.
+.host
