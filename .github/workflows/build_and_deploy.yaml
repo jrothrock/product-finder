@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh/
           echo "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZWQyNTUxOQAAACAOeQOGhd+1L5zhL0FEtFQznHk/BuNWk3bXouDZ9y7XQwAAAJiYpnoQmKZ6EAAAAAtzc2gtZWQyNTUxOQAAACAOeQOGhd+1L5zhL0FEtFQznHk/BuNWk3bXouDZ9y7XQwAAAEDOK9jdfFvcIZIZCUuKe8cLSUsulDUtGaX9V6GaKwHA/w55A4aF37UvnOEvQUS0VDOceT8G41aTdtei4Nn3LtdDAAAAFWpyb3Rocm9jazE0QGdtYWlsLmNvbQ==" > ~/.ssh/finder.key
-          chmod 600 ~/.ssh/finder.key
+          chmod 777 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
           Host finder
             HostName 198.199.118.43
