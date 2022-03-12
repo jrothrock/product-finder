@@ -55,7 +55,7 @@ jobs:
           mkdir -p ~/.ssh/
           ssh-keyscan ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
           ssh-agent -a ${{ env.SSH_AUTH_SOCK }} > /dev/null
-          ssh-add - <<< "${{ secrets.SSH_KEY }}"
+          echo "${{ env.SSH_KEY }}" | ssh-add -
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
           SSH_USER: ${{ secrets.SSH_USER }}
