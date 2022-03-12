@@ -4,39 +4,16 @@ Finds whether a certain item on Aliexpress or Alibaba can be sold on Amazon prof
 
 # Design
 
-TBD on whether cron based or daemons. Probably will use PostgreSQL and Redis (maybe). 
+## Deploying.
 
-Items are first scraped on Aliexpress or Alibaba
+Terraform is set up to create a digitalocean droplet, firewalls, and updating the dns records. Additionally, cloud-init
+is used to provision the server and install both docker and docker-compose - see provision.sh.
 
-Uses statsd and grafana to track scraping errors (low priority)
+1. Change into the terraform directory and run `terraform apply` which will create the infrastructure - will ask for DO token.
+After this has been completed, it takes another 2-3 minutes for cloud-init to complete the provision process.
 
-Flask server which does a basic load of items out of PostgreSQL and presents them on a page. Will need to figure out a way to paginate, or just sort them 
+2. Run `terraform output droplet_ipv4 > ./../.host`. This will create a .host file in the root of the directory which is used by
+the deploy script.
 
-# Potential items sites:
-Alibaba
-Aliexpress
-DHGate
-...
-
-# Todo:
-Customs
- - figure out costs
-Returns
- - figure out costs (may just be worth calling these lost)
-
-Incorporate other selling modes such as Ebay or Shopify
-
-Work on items dimensions regex. I think I may have some disconnect between what python actual does and what regex101 shows
-May want to to put threads into Flask's `g` variable, as well as keeping the state it is in (running, finished, etc.)
-## Issues. 
-
-Ebay only allows a few items to be sold (may require membership or a few sales, can't remember)
-
-Shopify will require google shopping feeds and a Return on Advertising will have to be calculated in the item processor
-
-Additionally, with the two above, shipping will have to be calculated either through USPS using the dimensions scraped
-
-This is curently done for Amazon using the FBA page:
-https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index
-
-Check implications of using `check_same_thread=true` which fixed the sqlalchemy thread error.
+3. Run the `./.deploy` script. This will create a new directory on the server, rsync over the files (may want to switch to a deploy key),
+stop prior docker containers, start the new ones, and delete the oldest deploy directory if there are more than 5.
