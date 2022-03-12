@@ -70,5 +70,5 @@ jobs:
         run: ssh finder 'mkdir -p ~/deploys/${{env.CURRENT_TIME}}'
 
       - name: Copy code to server
-        run: rsync -avz . ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER}}/deploys/${{env.CURRENT_TIME}}
+        run: rsync -avz . ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/deploys/${{env.CURRENT_TIME}}
   
