@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh/
           echo "${{ env.SSH_KEY }}" > ~/.ssh/finder.key
-          chmod 600 ~/.ssh/finder.key
+          chmod 400 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
           Host finder
             HostName ${{ env.SSH_HOST }}
