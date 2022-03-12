@@ -57,7 +57,7 @@ jobs:
           chmod 600 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
           Host finder
-            HostName ${{ env.SSH_HOST }}
+            HostName 198.199.100.147
             User ${{ env.SSH_USER }}
             IdentityFile ~/.ssh/finder.key
             StrictHostKeyChecking no
