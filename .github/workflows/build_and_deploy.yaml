@@ -63,7 +63,7 @@ jobs:
           SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
 
       - name: Create directory
-        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} 'mkdir -p ~/deploys/${{ env.CURRENT_TIME }}'
+        run: ssh ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }} 'mkdir -p ~/deploys/${{ env.CURRENT_TIME }}'
 
       - name: Copy code to server
         run: rsync -avz ./ finder:~/deploys/${{ env.CURRENT_TIME }}/
