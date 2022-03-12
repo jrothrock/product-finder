@@ -42,7 +42,7 @@ jobs:
       run: |
         poetry run python -m pytest
   deploy:
-    name: "Deploy to staging"
+    name: "Deploy"
     runs-on: ubuntu-latest
     # if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: test
@@ -72,4 +72,13 @@ jobs:
 
       - name: Copy code to server
         run: rsync -avz ./ finder:~/deploys/${{env.CURRENT_TIME}}/
+      
+      - name: Stop Docker containers
+        run: docker stop $(docker ps -q)
+      
+      - name: Start Docker
+        run: docker-compose up -d
+
+      - name: Remove Old Directory
+        run: ssh finder 'cd deploys; rm -rf $(ls -t1 | tail -n 1)'
   
