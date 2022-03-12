@@ -41,12 +41,13 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run python -m pytest
-  deploy: 
+  deploy:
     name: "Deploy to staging"
     runs-on: ubuntu-latest
     # if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: test
     steps:
+      - uses: actions/checkout@v2
       - name: Dynamically set MY_DATE environment variable
         run: echo CURRENT_TIME=$(date '+%s') >> $GITHUB_ENV
       - name: Configure SSH
