@@ -10,13 +10,15 @@ apt-get update -y
 echo "INSTALLING FAIL2BAN"
 apt-get install fail2ban -y
 
-# Create finder and deploy user, then add them to sudo. 
+# Create finder and deploy user, then add them to sudo without requiring password. 
 # Flags will disable password and iteractive form
 echo "ADDING USERS"
 adduser --disabled-password --gecos "" finder
 adduser --disabled-password --gecos "" deploy
 usermod -aG sudo finder
 usermod -aG sudo deploy
+echo 'finder ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
+echo 'deploy ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
 # Copy over ssh keys
 echo "COPYING KEYS"
@@ -25,12 +27,13 @@ head -1 /root/.ssh/authorized_keys >> /home/finder/.ssh/authorized_keys
 install -d -m 0700 -o deploy -g deploy /home/deploy/.ssh
 tail -1 /root/.ssh/authorized_keys >> /home/deploy/.ssh/authorized_keys
 
-echo "UPDATING SSH SERVICE"
 # Disable Root login
+echo "UPDATING SSH SERVICE"
 sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
 service ssh restart
 
 # Add docker and docker-compose
+echo "ADDING DOCKER AND DOCKER-COMPOSE"
 apt install apt-transport-https ca-certificates curl software-properties-common -y
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"

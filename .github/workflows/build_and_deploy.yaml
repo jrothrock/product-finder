@@ -48,7 +48,7 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@v2
-      - name: Dynamically set MY_DATE environment variable
+      - name: Dynamically set CURRENT_TIME environment variable
         run: echo CURRENT_TIME=$(date '+%s') >> $GITHUB_ENV
       - name: Configure SSH
         run: |
