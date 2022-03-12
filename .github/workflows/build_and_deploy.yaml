@@ -47,9 +47,6 @@ jobs:
     # if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: test
     steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
       - name: Dynamically set MY_DATE environment variable
         run: echo CURRENT_TIME=$(date '+%s') >> $GITHUB_ENV
       - name: Configure SSH
