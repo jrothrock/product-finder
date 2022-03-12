@@ -56,15 +56,15 @@ jobs:
           chmod 600 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
           Host finder
-            HostName $SSH_HOST
-            User $SSH_USER
+            HostName ${{ env.SSH_HOST }}
+            User ${{ env.SSH_USER }}
             IdentityFile ~/.ssh/finder.key
             StrictHostKeyChecking no
           END
         env:
-          SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
-          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Create directory
         run: ssh finder 'mkdir -p ~/deploys/${{env.CURRENT_TIME}}'
