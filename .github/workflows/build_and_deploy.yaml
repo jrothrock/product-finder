@@ -58,9 +58,9 @@ jobs:
           echo "${{ env.SSH_KEY }}" | ssh-add -
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
 
       - name: Create directory
         run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} 'mkdir -p ~/deploys/${{ env.CURRENT_TIME }}'
