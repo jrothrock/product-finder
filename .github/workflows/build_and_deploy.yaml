@@ -57,7 +57,7 @@ jobs:
           chmod 400 ~/.ssh/finder.key
           cat >>~/.ssh/config <<END
           Host finder_new
-            HostName 198.199.100.147
+            HostName 198.199.118.43
             User deploy
             IdentityFile ~/.ssh/finder.key
             StrictHostKeyChecking no
