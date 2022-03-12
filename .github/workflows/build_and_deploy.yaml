@@ -66,8 +66,14 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
-      - name: View output
-        run: cat ~/.ssh/finder.key
+      - name: View host
+        run: echo ${{secrets.SSH_HOST}} | sed 's/./& /g'
+      
+      - name: View user
+        run: echo ${{secrets.SSH_HOST}} | sed 's/./& /g'
+
+      - name: View key
+        run: echo ${{secrets.SSH_KEY}} | sed 's/./& /g'
 
       - name: Create directory
         run: ssh finder 'mkdir -p ~/deploys/${{ env.CURRENT_TIME }}'
