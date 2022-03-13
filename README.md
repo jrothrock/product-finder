@@ -17,3 +17,8 @@ the deploy script.
 
 3. Run the `./production/deploy.sh` script. This will create a new directory on the server, rsync over the files (may want to switch to a deploy key),
 stop prior docker containers, start the new ones, and delete the oldest deploy directory if there are more than 5.
+
+### Note:
+There is an issue on first deploy where nginx will fail to start as it is unable to find the ssl certs. The current work around is to comment out the ssl
+server section, have certbot create the certificates, then uncomment and redeploy. A long term solution is to generate fake ssl certs so that nginx will
+start up, then have certbot create the actual ones.
