@@ -4,8 +4,8 @@ services:
   web:
     build: ./..
     command: gunicorn --bind=0.0.0.0:5000 wsgi:app --timeout=10000 --log-level='debug'
-    expose:
-      - 5000
+    ports:
+      - 5000:5000
     depends_on:
       - db
       - cache
@@ -46,11 +46,31 @@ services:
     build: ./nginx
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - web
+    links:
+      - web
+    volumes:
+      - web-root:/var/www/html
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    command: certonly -n --webroot --webroot-path=/var/www/html --agree-tos -d finder.jackrothrock.com -m jrothrock14@gmail.com --no-eff-email
+    depends_on:
+      - nginx
 
 volumes:
   postgres_data:
   worker:
+  certbot-etc:
+  certbot-var:
   cache:
+    driver: local
+  web-root:
     driver: local
