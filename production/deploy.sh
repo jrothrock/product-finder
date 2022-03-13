@@ -12,7 +12,7 @@ rsync -avz --exclude=.venv --exclude=terraform/.terraform ./ deploy@$DROPLET_IP:
 ssh deploy@$DROPLET_IP "docker stop $(docker ps -q)"
 
 # Start docker containers.
-ssh deploy@$DROPLET_IP "cd ~/deploys/$CURRENT_TIME/; docker-compose up -d"
+ssh deploy@$DROPLET_IP "cd ~/deploys/$CURRENT_TIME/; docker-compose up -d --build --force-recreate"
 
 # Remove the oldest directory if there are more than 5.
 ssh deploy@$DROPLET_IP 'cd deploys; if [[ $(ls | wc -l) -gt 5 ]]; then rm -rf $(ls -t1 | tail -n 1); fi'

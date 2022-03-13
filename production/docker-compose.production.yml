@@ -2,10 +2,10 @@ version: "3.1"
 
 services:
   web:
-    build: .
-    command: gunicorn --bind=0.0.0.0:5000 wsgi:app --timeout=10000
-    ports:
-      - 5000:5000
+    build: ./..
+    command: gunicorn --bind=0.0.0.0:5000 wsgi:app --timeout=10000 --log-level='debug'
+    expose:
+      - 5000
     depends_on:
       - db
       - cache
@@ -15,7 +15,7 @@ services:
       - RUN_HEADLESS=True
       - REDIS_URL=redis://cache:6379
   worker:
-    build: .
+    build: ./..
     command: celery -A tasks beat
     depends_on:
       - "cache"
@@ -42,6 +42,12 @@ services:
       - POSTGRES_USER=finder
       - POSTGRES_PASSWORD=finder
       - POSTGRES_DB=scraperdb
+  nginx:
+    build: ./nginx
+    ports:
+      - 1338:80
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
