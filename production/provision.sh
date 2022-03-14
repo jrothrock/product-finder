@@ -1,5 +1,6 @@
 #!/bin/bash
 # Used via cloud-init in terraform/modules/digitalocean_droplet/main.tf
+# Logs can be found at /var/log/cloud-init-output.log
 
 # Update packages, and install fail2ban
 echo "UPDATING PACKAGES"
