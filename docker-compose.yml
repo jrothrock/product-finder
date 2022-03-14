@@ -52,6 +52,7 @@ services:
       - cache:/data
   db:
     image: postgres:13-alpine
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
