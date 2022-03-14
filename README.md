@@ -22,3 +22,5 @@ stop prior docker containers, start the new ones, and delete the oldest deploy d
 There is an issue on first deploy where nginx will fail to start as it is unable to find the ssl certs. The current work around is to comment out the ssl
 server section, have certbot create the certificates, then uncomment and redeploy. A long term solution is to generate fake ssl certs so that nginx will
 start up, then have certbot create the actual ones.
+
+This uses `s-2vcpu-2gb` - a $15 droplet. It's pretty much not possible to run this on a lower resource droplet.

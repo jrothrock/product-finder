@@ -3,6 +3,7 @@ import nltk
 from flask import Flask
 
 from application import views
+from utils import nltk as _nltk
 
 app = Flask(__name__)
 app.add_url_rule("/", view_func=views.index)
@@ -44,7 +45,7 @@ def install_requirements():
 
 def start():
     """DEV: Easy to use interface to download needed requirements and start flask app."""
-    install_requirements()
+    _nltk.download_nltk_resources()
     app.run(host="0.0.0.0")
 
 

@@ -14,11 +14,27 @@ services:
       - DATABASE_TYPE=postgres
       - RUN_HEADLESS=True
       - REDIS_URL=redis://cache:6379
-  worker:
+  celery:
     build: .
-    command: celery -A tasks beat
+    command: celery -A tasks worker -l info
     depends_on:
-      - "cache"
+      - cache
+      - db
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+    volumes:
+      - worker:/celery
+    environment:
+      - DATABASE_URL=postgresql://finder:finder@db:5432/scraperdb
+      - DATABASE_TYPE=postgres
+      - RUN_HEADLESS=True
+      - REDIS_URL=redis://cache:6379
+  celery-beat:
+    build: .
+    command: celery -A tasks beat -l info
+    depends_on:
+      - cache
+      - db
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
     stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
     volumes:

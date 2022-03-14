@@ -5,9 +5,13 @@ from celery.schedules import crontab
 import broker
 import calculator
 import scraper
+from utils import nltk as _nltk
 
 app = Celery("tasks", broker=f"{broker.REDIS_URL}/0")
 
+@app.on_after_configure.connect
+def install_nltk_resources(**kwargs):
+    _nltk.download_nltk_resources()
 
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
