@@ -28,7 +28,7 @@ def setup_periodic_tasks(sender, **kwargs):
     )
 
     sender.add_periodic_task(
-        crontab(minute=30), scrape_amazon_fees.s(), name="Scape Shopify Categories"
+        crontab(minute=30), scrape_amazon_fees.s(), name="Scape Amazon Fees"
     )
 
     sender.add_periodic_task(
