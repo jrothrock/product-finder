@@ -69,7 +69,7 @@ class Aliexpress(Driver):
                 )
                 pages += 1
 
-                if pages >= 3:
+                if pages >= 1:
                     break
                 time.sleep(1)
                 self.driver.find_element_by_class_name("next-next").click()

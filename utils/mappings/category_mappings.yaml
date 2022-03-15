@@ -1,5 +1,13 @@
 categories:
   "1":
     title: Home and Garden
-    aliexpress_url: https://www.aliexpress.com/category/15/home-garden.html?&SortType=create_desc
+    aliexpress_url: https://www.aliexpress.com/category/15/home-garden.html?SortType=create_desc
     amazon_category: Home and Garden (including Pet Supplies)
+  "2":
+    title: Home Appliances
+    aliexpress_url: https://www.aliexpress.com/category/6/home-appliances.html?SortType=create_desc
+    amazon_category: Home and Garden (including Pet Supplies)
+  "3":
+    title: Home Improvement
+    aliexpress_url: https://www.aliexpress.com/category/13/home-improvement.html?SortType=create_desc
+    amazon_category: Tools and Home Improvement
