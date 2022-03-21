@@ -3,7 +3,7 @@ version: "3.1"
 services:
   web:
     build: ./..
-    command: gunicorn --bind=0.0.0.0:5000 wsgi:app --timeout=10000 --log-level='debug'
+    command: gunicorn --bind=0.0.0.0:5000 wsgi:app --timeout=10000 --log-level='debug' --workers=2 --threads=4 --worker-class=gthread
     restart: always
     ports:
       - 5000:5000
