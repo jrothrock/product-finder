@@ -179,35 +179,35 @@ def item(item_id):
 
 def api_scrape_all():
     """Logic for starting scraping all task."""
-    tasks.scrape_all()
+    tasks.scrape_all.delay()
     return jsonify(success=True)
 
 
 def api_scrape_aliexpress():
     """Logic for starting alixpress scraping task."""
-    tasks.scrape_aliexpress()
+    tasks.scrape_aliexpress.delay()
     return jsonify(success=True)
 
 
 def api_scrape_amazon_fees():
     """Logic for starting amazon fees scraping task."""
-    tasks.scrape_amazon_fees()
+    tasks.scrape_amazon_fees.delay()
     return jsonify(success=True)
 
 
 def api_scrape_amazon_categories():
     """Logic for starting amazon categories scraping task."""
-    tasks.scrape_amazon_categories()
+    tasks.scrape_amazon_categories.delay()
     return jsonify(success=True)
 
 
 def api_scrape_shopify_categories():
     """Logic for starting shopify categories scraping task."""
-    tasks.scrape_shopify_categories()
+    tasks.scrape_shopify_categories.delay()
     return jsonify(success=True)
 
 
 def api_run_calculator():
     """Logic for starting calculations task."""
-    tasks.calculate_all()
+    tasks.calculate_all.delay()
     return jsonify(success=True)
