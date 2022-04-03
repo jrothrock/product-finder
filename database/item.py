@@ -11,16 +11,12 @@ from database.db import Database as db
 from database.db import Item as ItemDB
 
 ITEM_AMAZON_FEES_QUEUE = (
-               "test:queue:item:amazon:fees" 
-               if os.getenv("TEST_ENV")
-               else "queue:item:amazon:fees"
-            )
+    "test:queue:item:amazon:fees" if os.getenv("TEST_ENV") else "queue:item:amazon:fees"
+)
 
 ITEM_CALCULATOR_QUEUE = (
-               "test:queue:item:calculator" 
-               if os.getenv("TEST_ENV")
-               else "queue:item:calculator"
-            )
+    "test:queue:item:calculator" if os.getenv("TEST_ENV") else "queue:item:calculator"
+)
 
 
 class Item(db):

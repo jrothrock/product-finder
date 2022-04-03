@@ -12,28 +12,25 @@ from database.db import Item as ItemDB
 from scraper.core.drivers import Driver
 
 ITEM_AMAZON_FEES_QUEUE = (
-               "test:queue:item:amazon:fees" 
-               if os.getenv("TEST_ENV")
-               else "queue:item:amazon:fees"
-            )
+    "test:queue:item:amazon:fees" if os.getenv("TEST_ENV") else "queue:item:amazon:fees"
+)
 
 ITEM_CALCULATOR_QUEUE = (
-               "test:queue:item:calculator" 
-               if os.getenv("TEST_ENV")
-               else "queue:item:calculator"
-            )
+    "test:queue:item:calculator" if os.getenv("TEST_ENV") else "queue:item:calculator"
+)
 
 CATEGORY_CALCULATOR_QUEUE = (
-               "test:queue:category:calculator" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:calculator"
-            )
+    "test:queue:category:calculator"
+    if os.getenv("TEST_ENV")
+    else "queue:category:calculator"
+)
 
 CATEGORY_AMAZON_FEES_QUEUE = (
-               "test:queue:category:amazon:fees" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:amazon:fees"
-            )
+    "test:queue:category:amazon:fees"
+    if os.getenv("TEST_ENV")
+    else "queue:category:amazon:fees"
+)
+
 
 class AmazonFee(Driver):
     """Class that holds procedures for scraping Amazon fees."""
@@ -67,13 +64,12 @@ class AmazonFee(Driver):
                     f"Exception scraping amazon category fees: {e.__dict__}"
                 )
                 pass
-    
+
     def _add_to_redis_queue(self, record_id, db_klass):
         if db_klass == ItemDB:
             self.redis.rpush(ITEM_CALCULATOR_QUEUE, record_id)
         else:
             self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, record_id)
-
 
     def _get_amazon(self, record_id, db_klass):
         """Scrape the amazon page for a particular category or item."""
@@ -149,7 +145,7 @@ class AmazonFee(Driver):
         )
         session.commit()
         session.close()
-        
+
         self._add_to_redis_queue(record_id, db_klass)
 
         self.driver.delete_all_cookies()

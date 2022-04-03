@@ -14,28 +14,27 @@ from database.db import Database
 from scraper.core.drivers import Driver
 
 CATEGORY_SHOPIFY_QUEUE = (
-               "test:queue:category:shopify" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:shopify"
-            )
+    "test:queue:category:shopify" if os.getenv("TEST_ENV") else "queue:category:shopify"
+)
 
 CATEGORY_AMAZON_FEES_QUEUE = (
-               "test:queue:category:amazon:fees" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:amazon:fees"
-            )
+    "test:queue:category:amazon:fees"
+    if os.getenv("TEST_ENV")
+    else "queue:category:amazon:fees"
+)
 
 CATEGORY_CALCULATOR_QUEUE = (
-               "test:queue:category:calculator" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:calculator"
-            )
+    "test:queue:category:calculator"
+    if os.getenv("TEST_ENV")
+    else "queue:category:calculator"
+)
 
 CATEGORY_AMAZON_LISTINGS_QUEUE = (
-               "test:queue:category:amazon:listings" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:amazon:listings"
-            )
+    "test:queue:category:amazon:listings"
+    if os.getenv("TEST_ENV")
+    else "queue:category:amazon:listings"
+)
+
 
 class AmazonCategory(Driver):
     """Class that holds procedures for scraping Amazon categories."""

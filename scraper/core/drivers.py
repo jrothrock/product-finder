@@ -1,6 +1,6 @@
 """Driver module used for running selenium."""
-import os
 import atexit
+import os
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By  # noqa
@@ -33,7 +33,7 @@ class Driver(object):
         )
 
         atexit.register(self._close_driver)
-    
+
     def _close_driver(self):
-        if hasattr(self, 'driver'):
+        if hasattr(self, "driver"):
             self.driver.quit()

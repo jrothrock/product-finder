@@ -8,10 +8,11 @@ from database.db import Category as CategoryDB
 from database.db import Database as db
 
 CATEGORY_AMAZON_LISTINGS_QUEUE = (
-               "test:queue:category:amazon:listings" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:amazon:listings"
-            )
+    "test:queue:category:amazon:listings"
+    if os.getenv("TEST_ENV")
+    else "queue:category:amazon:listings"
+)
+
 
 class Category(db):
     """Class which holds procedures commonly used when creating category records."""
@@ -54,11 +55,7 @@ class Category(db):
         """Create a category recored."""
         title = self._create_title(kwargs.pop("category_words"))
         title_version = self._title_cohort()
-        new_category = CategoryDB(
-            title=title,
-            title_version=title_version,
-            **kwargs
-        )
+        new_category = CategoryDB(title=title, title_version=title_version, **kwargs)
         self.session.add(new_category)
         self.session.commit()
         self.session.refresh(new_category)

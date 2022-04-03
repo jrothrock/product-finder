@@ -1,15 +1,14 @@
-import os
 import sys
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
 
+import broker
 from database.category import Category as CategoryModel
 from database.db import Category as CategoryDB
 from database.db import Database
 from scraper.sites.amazon import category
-import broker
 
 
 @patch(
@@ -19,15 +18,18 @@ import broker
 def _setup_mock_database_klass():
     return Database
 
+
 def _remove_previous_db_records():
-  session = Database().session
-  session.query(CategoryDB).delete()
-  session.close()
+    session = Database().session
+    session.query(CategoryDB).delete()
+    session.close()
+
 
 def _remove_previous_redis_records():
-  redis = broker.redis()
-  for key in redis.scan_iter("test:*"):
-    redis.delete(key)
+    redis = broker.redis()
+    for key in redis.scan_iter("test:*"):
+        redis.delete(key)
+
 
 def _setup_mock_values():
     return CategoryModel().new(
@@ -36,14 +38,14 @@ def _setup_mock_values():
 
 
 def _setup_test():
-  """Sets up the test. Creating mocks, values, etc."""
-  sys.modules["database.db"] = _setup_mock_database_klass()
-  _remove_previous_db_records()
-  _remove_previous_redis_records()
+    """Sets up the test. Creating mocks, values, etc."""
+    sys.modules["database.db"] = _setup_mock_database_klass()
+    _remove_previous_db_records()
+    _remove_previous_redis_records()
 
-  new_category = _setup_mock_values()
+    new_category = _setup_mock_values()
 
-  return new_category
+    return new_category
 
 
 # This test is being skipped as it has been found challenging to mock selenium requests.

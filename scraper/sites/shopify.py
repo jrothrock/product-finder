@@ -11,11 +11,9 @@ from database.db import Database
 from scraper.core.drivers import Driver
 
 CATEGORY_SHOPIFY_QUEUE = (
-               "test:queue:category:shopify" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:shopify"
-            )
-            
+    "test:queue:category:shopify" if os.getenv("TEST_ENV") else "queue:category:shopify"
+)
+
 
 class ShopifyCategory(Driver):
     """Class that holds procedures for scraping Shopify store counts."""

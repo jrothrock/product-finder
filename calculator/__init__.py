@@ -28,16 +28,14 @@ GROSS_MARGIN_PERCENTAGE = 0.4
 # PHOTOGRAPHY_COSTS?
 
 ITEM_CALCULATOR_QUEUE = (
-               "test:queue:item:calculator" 
-               if os.getenv("TEST_ENV")
-               else "queue:item:calculator"
-            )
+    "test:queue:item:calculator" if os.getenv("TEST_ENV") else "queue:item:calculator"
+)
 
 CATEGORY_CALCULATOR_QUEUE = (
-               "test:queue:category:calculator" 
-               if os.getenv("TEST_ENV")
-               else "queue:category:calculator"
-            )
+    "test:queue:category:calculator"
+    if os.getenv("TEST_ENV")
+    else "queue:category:calculator"
+)
 
 
 class CategoryCalculator:

@@ -1,16 +1,15 @@
-import os
 import sys
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
 
+import broker
 from database.category import Category as CategoryModel
 from database.db import Category as CategoryDB
 from database.db import Database
 from scraper.sites.amazon import fees
 
-import broker
 
 @patch(
     "database.db.Database._engine",
@@ -19,19 +18,22 @@ import broker
 def _setup_mock_database_klass():
     return Database
 
+
 def _remove_previous_db_records():
-  session = Database().session
-  session.query(CategoryDB).delete()
-  session.close()
+    session = Database().session
+    session.query(CategoryDB).delete()
+    session.close()
+
 
 def _remove_previous_redis_records():
-  redis = broker.redis()
-  for key in redis.scan_iter("test:*"):
-    redis.delete(key)
+    redis = broker.redis()
+    for key in redis.scan_iter("test:*"):
+        redis.delete(key)
+
 
 def _setup_mock_values():
     return CategoryModel().new(
-        category_words=["Espresso", "Machine"], 
+        category_words=["Espresso", "Machine"],
         amazon_category="1",
         amazon_total_results=2,
         amazon_min_price=15,
@@ -47,24 +49,25 @@ def _setup_mock_values():
         amazon_average_height=13,
         amazon_deviation_dimensions=0,
         amazon_average_weight=2,
-        amazon_deviation_weight=1
+        amazon_deviation_weight=1,
     )
 
+
 def _setup_redis_values(category):
-  """Add the test category record to redis."""
-  broker.redis().rpush("test:queue:category:amazon:fees", category.id)
+    """Add the test category record to redis."""
+    broker.redis().rpush("test:queue:category:amazon:fees", category.id)
+
 
 def _setup_test():
-  """Sets up the test. Creating mocks, values, etc."""
-  sys.modules["database.db"] = _setup_mock_database_klass()
-  _remove_previous_db_records()
-  _remove_previous_redis_records()
+    """Sets up the test. Creating mocks, values, etc."""
+    sys.modules["database.db"] = _setup_mock_database_klass()
+    _remove_previous_db_records()
+    _remove_previous_redis_records()
 
-  new_category = _setup_mock_values()
-  _setup_redis_values(new_category)
+    new_category = _setup_mock_values()
+    _setup_redis_values(new_category)
 
-  return new_category
-
+    return new_category
 
 
 # This test is being skipped as it has been found challenging to mock selenium requests.
