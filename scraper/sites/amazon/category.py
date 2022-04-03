@@ -1,5 +1,6 @@
 """Module which scrapes the Amazon category."""
 import logging
+import os
 import re
 import statistics
 import time
@@ -12,6 +13,29 @@ from database.db import Category as CategoryDB
 from database.db import Database
 from scraper.core.drivers import Driver
 
+CATEGORY_SHOPIFY_QUEUE = (
+               "test:queue:category:shopify" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:shopify"
+            )
+
+CATEGORY_AMAZON_FEES_QUEUE = (
+               "test:queue:category:amazon:fees" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:amazon:fees"
+            )
+
+CATEGORY_CALCULATOR_QUEUE = (
+               "test:queue:category:calculator" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:calculator"
+            )
+
+CATEGORY_AMAZON_LISTINGS_QUEUE = (
+               "test:queue:category:amazon:listings" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:amazon:listings"
+            )
 
 class AmazonCategory(Driver):
     """Class that holds procedures for scraping Amazon categories."""
@@ -19,12 +43,12 @@ class AmazonCategory(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
 
     def _check_categories(self):
         """Check the Amazon queue and process the categories."""
-        category_ids = self.redis.lrange("queue:category:amazon:listings", 0, -1)
-        self.redis.delete("queue:category:amazon:listings")
+        category_ids = self.redis.lrange(CATEGORY_AMAZON_LISTINGS_QUEUE, 0, -1)
+        self.redis.delete(CATEGORY_AMAZON_LISTINGS_QUEUE)
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):
@@ -133,13 +157,15 @@ class AmazonCategory(Driver):
         )
         session.commit()
         session.close()
-        self.redis.rpush("queue:category:shopify", category.id)
+        self.redis.rpush(CATEGORY_SHOPIFY_QUEUE, category.id)
 
         category_dimensions_and_weight_dict_values = (
             category_dimensions_and_weight_dict.values()
         )
         if None not in category_dimensions_and_weight_dict_values:
-            self.redis.rpush("queue:category:amazon:fees", category.id)
+            self.redis.rpush(CATEGORY_AMAZON_FEES_QUEUE, category.id)
+        else:
+            self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, category.id)
 
     def _get_price_from_text(self, price_text):
         """Pull the numeric price from a text string."""

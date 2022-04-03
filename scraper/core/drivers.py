@@ -1,5 +1,6 @@
 """Driver module used for running selenium."""
 import os
+import atexit
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By  # noqa
@@ -23,7 +24,7 @@ class Driver(object):
         self.caps = DesiredCapabilities().FIREFOX
         self.caps[
             "pageLoadStrategy"
-        ] = "eager"  # don't freeze on 3rd party scripts taking awhile to load.
+        ] = "eager"  # don't freeze on 3rd party scripts taking a while to load.
 
         self.driver = webdriver.Firefox(
             firefox_options=options,
@@ -31,8 +32,8 @@ class Driver(object):
             executable_path=GeckoDriverManager().install(),
         )
 
-    # TODO: Further investigate implications of removal or changing to __exit__ dunder method.
-    def __del__(self, *exc):
-        """Close driver when all references to class have been removed."""
-        if self.driver:
+        atexit.register(self._close_driver)
+    
+    def _close_driver(self):
+        if hasattr(self, 'driver'):
             self.driver.quit()

@@ -1,5 +1,6 @@
 """Item module which holds procedures commonly used when creating item records."""
 import logging
+import os
 
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -9,6 +10,18 @@ import utils.unit_conversions as unit_conversions
 from database.db import Database as db
 from database.db import Item as ItemDB
 
+ITEM_AMAZON_FEES_QUEUE = (
+               "test:queue:item:amazon:fees" 
+               if os.getenv("TEST_ENV")
+               else "queue:item:amazon:fees"
+            )
+
+ITEM_CALCULATOR_QUEUE = (
+               "test:queue:item:calculator" 
+               if os.getenv("TEST_ENV")
+               else "queue:item:calculator"
+            )
+
 
 class Item(db):
     """Class which holds procedures commonly used when creating item records."""
@@ -16,7 +29,7 @@ class Item(db):
     def __init__(self):
         """Instantiate database communication and Redis."""
         super().__init__()
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
 
     def find_or_create(self, **kwargs):
         """Find or creates an item record based on the title."""
@@ -112,6 +125,6 @@ class Item(db):
             and new_item.height != 0
             and new_item.weight != 0
         ):
-            self.redis.rpush("queue:item:amazon:fees", new_item.id)
+            self.redis.rpush(ITEM_AMAZON_FEES_QUEUE, new_item.id)
         else:
-            self.redis.rpush("queue:item:calculator", new_item.id)
+            self.redis.rpush(ITEM_CALCULATOR_QUEUE, new_item.id)

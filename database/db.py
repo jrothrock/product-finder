@@ -1,5 +1,6 @@
 """Module that houses procedures and schemas for the database."""
 # Honestly, I should have gone with a non relational database.
+import atexit
 import os
 
 import sqlalchemy as db
@@ -86,10 +87,19 @@ class Category:
 class Database:
     """Class which sets up procedures used for communicating with database."""
 
+    @classmethod
+    def _engine(cls):
+        """Will return the DATABASE_URL. Useful for mocking."""
+        return os.environ.get("DATABASE_URL", "sqlite:///database/finder.sqlite")
+
+    def _cleanup(self):
+        """Need to cleanup the db session if it still exists -- will prevent conn leakage."""
+        self.session.close()
+
     def __init__(self):
         """Instantiate communication with the database."""
         self.db = db
-        engine = os.environ.get("DATABASE_URL", "sqlite:///database/test.sqlite")
+        engine = self._engine()
         conn_args = (
             {} if os.environ.get("DATABASE_TYPE") else {"check_same_thread": False}
         )
@@ -106,3 +116,4 @@ class Database:
         self.metadata = MetaData()
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
+        atexit.register(self._cleanup)

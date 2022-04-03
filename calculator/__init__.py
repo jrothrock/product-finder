@@ -1,5 +1,6 @@
 """Subpackage for running profitability calculations on category and item records."""
 import logging
+import os
 
 import broker as broker
 import utils.system as system
@@ -26,18 +27,30 @@ GROSS_MARGIN_PERCENTAGE = 0.4
 # FIVERR_COPYWRITING_DESCRIPTION = 30 # 300 words at 10 cents a word
 # PHOTOGRAPHY_COSTS?
 
+ITEM_CALCULATOR_QUEUE = (
+               "test:queue:item:calculator" 
+               if os.getenv("TEST_ENV")
+               else "queue:item:calculator"
+            )
+
+CATEGORY_CALCULATOR_QUEUE = (
+               "test:queue:category:calculator" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:calculator"
+            )
+
 
 class CategoryCalculator:
     """Class which holds procedures for running category profitability calculations."""
 
     def __init__(self):
         """Instantiate Redis."""
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
 
     def _check_categories(self):
         """Check for categories that need to have calculations performed."""
-        category_ids = self.redis.lrange("queue:category:calculator", 0, -1)
-        self.redis.delete("queue:category:calculator")
+        category_ids = self.redis.lrange(CATEGORY_CALCULATOR_QUEUE, 0, -1)
+        self.redis.delete(CATEGORY_CALCULATOR_QUEUE)
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):
@@ -66,7 +79,7 @@ class CategoryCalculator:
         ) * (1 - GROSS_MARGIN_PERCENTAGE)
         average_min_break_even_amazon = average_min_break_even + category.amazon_fee
         session = Database().session
-        session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
+        session.query(CategoryDB).filter(CategoryDB.id == int(category_id)).update(
             {
                 "average_min_break_even": average_min_break_even,
                 "average_min_break_even_amazon": average_min_break_even_amazon,
@@ -81,7 +94,7 @@ class CategoryCalculator:
             Database()
             .session.query(ItemDB, CategoryDB)
             .join(CategoryDB)
-            .filter(CategoryDB.id == category_id)
+            .filter(CategoryDB.id == int(category_id))
             .all()
         )
         shipping_costs = []
@@ -104,12 +117,12 @@ class ItemCalculator:
 
     def __init__(self):
         """Instantiate Redis."""
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
 
     def _check_items(self):
         """Check for items that need to have calculations performed."""
-        item_ids = self.redis.lrange("queue:item:calculator", 0, -1)
-        self.redis.delete("queue:item:calculator")
+        item_ids = self.redis.lrange(ITEM_CALCULATOR_QUEUE, 0, -1)
+        self.redis.delete(ITEM_CALCULATOR_QUEUE)
         self._process_items(item_ids)
 
     def _process_items(self, item_ids):
@@ -131,7 +144,7 @@ class ItemCalculator:
             break_even_sale_price + item.amazon_fee if item.amazon_fee else None
         )
         session = Database().session
-        session.query(ItemDB).filter(ItemDB.id == item.id).update(
+        session.query(ItemDB).filter(ItemDB.id == int(item_id)).update(
             {
                 "break_even_sale_price": break_even_sale_price,
                 "break_even_amazon_sale_price": break_even_amazon_sale_price,

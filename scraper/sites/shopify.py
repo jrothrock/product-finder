@@ -1,5 +1,6 @@
 """Module for scraping number of shopify stores for a particular category."""
 import logging
+import os
 import re
 import time
 
@@ -9,6 +10,12 @@ from database.db import Category as CategoryDB
 from database.db import Database
 from scraper.core.drivers import Driver
 
+CATEGORY_SHOPIFY_QUEUE = (
+               "test:queue:category:shopify" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:shopify"
+            )
+            
 
 class ShopifyCategory(Driver):
     """Class that holds procedures for scraping Shopify store counts."""
@@ -16,12 +23,12 @@ class ShopifyCategory(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
 
     def _check_categories(self):
         """Check the Shopify category queue and process categories."""
-        category_ids = self.redis.lrange("queue:category:shopify", 0, -1)
-        self.redis.delete("queue:category:shopify")
+        category_ids = self.redis.lrange(CATEGORY_SHOPIFY_QUEUE, 0, -1)
+        self.redis.delete(CATEGORY_SHOPIFY_QUEUE)
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):

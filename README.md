@@ -40,9 +40,17 @@ To start the application:
 ### Docker
 Requires both docker and docker-compose. Records will be stored in postgreSQL.
 1. `docker-compose up -d --force-recreate`
+
+### Testing
+Some tests have been marked to be skipped as full mocking for them hasn't been completed.
+
+To run these tests alongside the rest of the test suite (will require a local redis-server running):
+
+`python -m pytest --no-skips`
+
 ## Production
 
-Ideally, I'd have a node per a container, but due to wanting to keep costs low and for simplicity sake, I've decided to use docker-compose in production.
+Due to wanting to keep costs low and for simplicity sake, I've decided to use docker-compose in production.
 
 ### Deploying
 
@@ -67,10 +75,17 @@ This uses `s-2vcpu-2gb` - a $15 droplet. It's pretty much not possible to run th
 
 ### Useful commands
 * Latest deploy directory: 
+
 `cd deploys/current;`
+
 * List docker containers:
+
 `docker ps`
-* Get logs from a container (need to be in deploys/current directory):
-`docker-compose -f production/docker-compose.production.yml logs db`
+
+* Get logs from a container:
+
+`docker-compose -f ~/deploys/current/production/docker-compose.production.yml logs db`
+
 * Access the shell of a container (note, cache/redis uses Alpine which doesn't have bash and will need `/bin/sh`)
-`docker-compose -f production/docker-compose.production.yml exec web /bin/bash`
+
+`docker-compose -f ~/deploys/current/production/docker-compose.production.yml exec web /bin/bash`

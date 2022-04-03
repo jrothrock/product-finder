@@ -1,5 +1,6 @@
 """Module for scraping AmazonFees -- Category and Item."""
 import logging
+import os
 import time
 
 import broker
@@ -10,6 +11,29 @@ from database.db import Database
 from database.db import Item as ItemDB
 from scraper.core.drivers import Driver
 
+ITEM_AMAZON_FEES_QUEUE = (
+               "test:queue:item:amazon:fees" 
+               if os.getenv("TEST_ENV")
+               else "queue:item:amazon:fees"
+            )
+
+ITEM_CALCULATOR_QUEUE = (
+               "test:queue:item:calculator" 
+               if os.getenv("TEST_ENV")
+               else "queue:item:calculator"
+            )
+
+CATEGORY_CALCULATOR_QUEUE = (
+               "test:queue:category:calculator" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:calculator"
+            )
+
+CATEGORY_AMAZON_FEES_QUEUE = (
+               "test:queue:category:amazon:fees" 
+               if os.getenv("TEST_ENV")
+               else "queue:category:amazon:fees"
+            )
 
 class AmazonFee(Driver):
     """Class that holds procedures for scraping Amazon fees."""
@@ -17,18 +41,18 @@ class AmazonFee(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
 
     def _check_categories(self):
         """Check the Amazon category fees queue and process the categories."""
-        category_ids = self.redis.lrange("queue:category:amazon:fees", 0, -1)
-        self.redis.delete("queue:category:amazon:fees")
+        category_ids = self.redis.lrange(CATEGORY_AMAZON_FEES_QUEUE, 0, -1)
+        self.redis.delete(CATEGORY_AMAZON_FEES_QUEUE)
         self._process_record(category_ids, CategoryDB)
 
     def _check_items(self):
         """Check the Amazon item fees queue and process the items."""
-        item_ids = self.redis.lrange("queue:item:amazon:fees", 0, -1)
-        self.redis.delete("queue:item:amazon:fees")
+        item_ids = self.redis.lrange(ITEM_AMAZON_FEES_QUEUE, 0, -1)
+        self.redis.delete(ITEM_AMAZON_FEES_QUEUE)
         self._process_record(item_ids, ItemDB)
 
     def _process_record(self, record_ids, db_klass):
@@ -38,10 +62,18 @@ class AmazonFee(Driver):
             except KeyboardInterrupt:
                 system.exit()
             except Exception as e:
+                self._add_to_redis_queue(record_id, db_klass)
                 logging.exception(
-                    f"Exception scraping number of shopify sites: {e.__dict__}"
+                    f"Exception scraping amazon category fees: {e.__dict__}"
                 )
                 pass
+    
+    def _add_to_redis_queue(self, record_id, db_klass):
+        if db_klass == ItemDB:
+            self.redis.rpush(ITEM_CALCULATOR_QUEUE, record_id)
+        else:
+            self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, record_id)
+
 
     def _get_amazon(self, record_id, db_klass):
         """Scrape the amazon page for a particular category or item."""
@@ -117,10 +149,8 @@ class AmazonFee(Driver):
         )
         session.commit()
         session.close()
-        if isinstance(record, ItemDB):
-            self.redis.rpush("queue:item:calculator", record.id)
-        else:
-            self.redis.rpush("queue:category:calculator", record.id)
+        
+        self._add_to_redis_queue(record_id, db_klass)
 
         self.driver.delete_all_cookies()
 

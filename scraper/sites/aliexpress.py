@@ -1,5 +1,6 @@
 """Module for scraping Aliexpress products."""
 import logging
+import os
 import re
 import time
 
