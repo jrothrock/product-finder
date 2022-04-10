@@ -22,7 +22,6 @@ SQLAlchemy-Utils = "^0.38.2"
 [tool.poetry.dev-dependencies]
 black = "^22.1"
 flake8 = "^4.0"
-ipython = "^7.27"
 pydocstyle = "^6.1"
 pytest = "^6.2"
 toml = "^0.10"
