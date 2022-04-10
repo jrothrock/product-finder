@@ -11,9 +11,9 @@ def cleanup(func):
     def wrapper(*args, **kwargs):
         """Will return a wrapper to be called by celery."""
         try:
-          func(*args, **kwargs)
+            func(*args, **kwargs)
         except Exception as e:
-          logging.exception(f"Exception in task: {e.__dict__}")
+            logging.exception(f"Exception in task: {e.__dict__}")
 
         database.db.database_instance.cleanup()
         scraper.core.drivers.driver_instance.cleanup()

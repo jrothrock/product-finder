@@ -18,7 +18,7 @@ class Driver:
         options.add_argument("start-maximized")
         if headless:
             options.add_argument("--headless")
-        
+
         return options
 
     def _capabilities(self):
