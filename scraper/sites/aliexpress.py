@@ -50,8 +50,6 @@ class Aliexpress(Driver):
                 for link in urls:
                     try:
                         self._scrape_page(link, amazon_category)
-                    except KeyboardInterrupt:
-                        system.exit()
                     except selenium.common.exceptions.TimeoutException:
                         logging.exception(
                             "Timeout occurred on page. Items may not have been found. Passing"

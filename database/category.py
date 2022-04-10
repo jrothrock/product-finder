@@ -4,8 +4,8 @@ import os
 from sqlalchemy.orm.exc import NoResultFound
 
 import broker
+import database.db
 from database.db import Category as CategoryDB
-from database.db import Database as db
 
 CATEGORY_AMAZON_LISTINGS_QUEUE = (
     "test:queue:category:amazon:listings"
@@ -14,13 +14,14 @@ CATEGORY_AMAZON_LISTINGS_QUEUE = (
 )
 
 
-class Category(db):
+class Category(database.db.Database):
     """Class which holds procedures commonly used when creating category records."""
 
     def __init__(self):
         """Instantiate database communication and Redis."""
         super().__init__()
         self.redis = broker.redis()
+        self.session = database.db.database_instance.get_session()
 
     def _title_cohort(self):
         """Return the title cohort version."""
@@ -49,6 +50,7 @@ class Category(db):
         except NoResultFound:
             category = self.new(**kwargs)
 
+        self.session.close()
         return category
 
     def new(self, **kwargs):
@@ -60,4 +62,5 @@ class Category(db):
         self.session.commit()
         self.session.refresh(new_category)
         self._add_to_redis_queue(new_category)
+        self.session.close()
         return new_category

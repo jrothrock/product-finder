@@ -4,10 +4,10 @@ import os
 import time
 
 import broker
+import database.db
 import utils.mappings as mappings
 import utils.system as system
 from database.db import Category as CategoryDB
-from database.db import Database
 from database.db import Item as ItemDB
 from scraper.core.drivers import Driver
 
@@ -39,6 +39,7 @@ class AmazonFee(Driver):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
         self.redis = broker.redis()
+        self.session = database.db.database_instance.get_session()
 
     def _check_categories(self):
         """Check the Amazon category fees queue and process the categories."""
@@ -74,7 +75,7 @@ class AmazonFee(Driver):
     def _get_amazon(self, record_id, db_klass):
         """Scrape the amazon page for a particular category or item."""
         time.sleep(1)
-        record = Database().session.query(db_klass).get(int(record_id))
+        record = self.session.query(db_klass).get(int(record_id))
         self.driver.get(
             "https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index?lang=en_US"
         )
@@ -139,12 +140,10 @@ class AmazonFee(Driver):
         amazon_fees = self.driver.find_element_by_id(
             "afn-seller-proceeds"
         ).get_attribute("value")
-        session = Database().session
-        session.query(db_klass).filter(db_klass.id == record.id).update(
+        self.session.query(db_klass).filter(db_klass.id == record.id).update(
             {"amazon_fee": float(amazon_fees[1:])}
         )
-        session.commit()
-        session.close()
+        self.session.commit()
 
         self._add_to_redis_queue(record_id, db_klass)
 

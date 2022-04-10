@@ -5,9 +5,9 @@ import re
 import time
 
 import broker
+import database.db
 import utils.system as system
 from database.db import Category as CategoryDB
-from database.db import Database
 from scraper.core.drivers import Driver
 
 CATEGORY_SHOPIFY_QUEUE = (
@@ -22,6 +22,7 @@ class ShopifyCategory(Driver):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
         self.redis = broker.redis()
+        self.session = database.db.database_instance.get_session()
 
     def _check_categories(self):
         """Check the Shopify category queue and process categories."""
@@ -44,7 +45,7 @@ class ShopifyCategory(Driver):
 
     def _get_shopify(self, category_id):
         """Pull the shopify store count for a particular category from Google."""
-        category = Database().session.query(CategoryDB).get(int(category_id))
+        category = self.session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
         self.driver.get(
             "https://www.google.com/search?q=site%3Amyshopify.com+"
@@ -57,14 +58,13 @@ class ShopifyCategory(Driver):
         number_of_shopify_sites = self._get_number_of_sites(
             number_of_sites_elem.get_attribute("innerHTML")
         )
-        session = Database().session
-        session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
+
+        self.session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
             {
                 "number_of_shopify_sites": number_of_shopify_sites,
             }
         )
-        session.commit()
-        session.close()
+        self.session.commit()
 
     def _get_number_of_sites(self, number_of_sites_elem_text):
         """Get integer number of stores from text body."""

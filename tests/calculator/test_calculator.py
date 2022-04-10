@@ -14,7 +14,7 @@ from database.item import Item as ItemModel
 
 
 @patch(
-    "database.db.Database._engine",
+    "database.db.Database._engine_url",
     MagicMock(return_value="sqlite:///database/test.sqlite"),
 )
 def _setup_mock_database_klass():
@@ -22,7 +22,8 @@ def _setup_mock_database_klass():
 
 
 def _remove_previous_db_records():
-    session = Database().session
+    db = Database()
+    session = db.get_session()
     session.query(ItemDB).delete()
     session.query(CategoryDB).delete()
     session.close()
@@ -98,7 +99,9 @@ def test_calculate_items(amazon_fee):
 
     calculator.calculate_items()
 
-    updated_item = Database().session.query(ItemDB).get(int(item.id))
+    db = Database()
+    session = db.get_session()
+    updated_item = session.query(ItemDB).get(int(item.id))
 
     assert updated_item.break_even_sale_price != 0
     assert updated_item.break_even_amazon_sale_price != 0
@@ -110,7 +113,9 @@ def test_calculate_categories(amazon_fee):
 
     calculator.calculate_categories()
 
-    updated_category = Database().session.query(CategoryDB).get(int(category.id))
+    db = Database()
+    session = db.get_session()
+    updated_category = session.query(CategoryDB).get(int(category.id))
 
     assert updated_category.average_min_break_even != 0
     assert updated_category.average_min_break_even_amazon != 0

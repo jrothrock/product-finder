@@ -8,8 +8,8 @@ from sqlalchemy import text
 
 import tasks
 from database.db import Category as CategoryDB
-from database.db import Database
 from database.db import Item as ItemDB
+from database.db import database_instance
 from database.db import func
 
 PAGE_SIZE = 50
@@ -17,7 +17,7 @@ PAGE_SIZE = 50
 
 def index():
     """Logic for showing categories and items on index/home page."""
-    session = Database().session
+    session = database_instance.get_session()
     item_count = session.query(func.count(ItemDB.id)).scalar()
     category_count = session.query(func.count(CategoryDB.id)).scalar()
 
@@ -40,7 +40,6 @@ def index():
         .all()
     )
 
-    session.close()
     return render_template(
         "index.html",
         records=records,
@@ -53,7 +52,7 @@ def index():
 
 def categories():
     """Logic for categories on the categories page."""
-    session = Database().session
+    session = database_instance.get_session()
     category_count = session.query(func.count(CategoryDB.id)).scalar()
 
     current_page = int(request.args.get("page", 1))
@@ -74,7 +73,6 @@ def categories():
         .all()
     )
 
-    session.close()
     return render_template(
         "categories.html",
         records=records,
@@ -86,7 +84,7 @@ def categories():
 
 def category(category_id):
     """Logic for showing a specific category page."""
-    session = Database().session
+    session = database_instance.get_session()
     item_count = (
         session.query(ItemDB, CategoryDB)
         .join(CategoryDB)
@@ -113,7 +111,6 @@ def category(category_id):
         .all()
     )
 
-    session.close()
     return render_template(
         "category.html",
         records=records,
@@ -125,7 +122,7 @@ def category(category_id):
 
 def items():
     """Logic for showing items on the item page."""
-    session = Database().session
+    session = database_instance.get_session()
     item_count = session.query(func.count(ItemDB.id)).scalar()
 
     current_page = int(request.args.get("page", 1))
@@ -146,7 +143,6 @@ def items():
         .all()
     )
 
-    session.close()
     return render_template(
         "items.html",
         item_count=item_count,
@@ -158,7 +154,7 @@ def items():
 
 def item(item_id):
     """Logic for showing a specific item page."""
-    session = Database().session
+    session = database_instance.get_session()
 
     records = (
         session.query(
@@ -173,7 +169,6 @@ def item(item_id):
         .all()
     )
 
-    session.close()
     return render_template("item.html", records=records)
 
 

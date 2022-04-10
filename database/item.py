@@ -5,9 +5,9 @@ import os
 from sqlalchemy.orm.exc import NoResultFound
 
 import broker
+import database.db
 import utils.system as system
 import utils.unit_conversions as unit_conversions
-from database.db import Database as db
 from database.db import Item as ItemDB
 
 ITEM_AMAZON_FEES_QUEUE = (
@@ -19,13 +19,14 @@ ITEM_CALCULATOR_QUEUE = (
 )
 
 
-class Item(db):
+class Item(database.db.Database):
     """Class which holds procedures commonly used when creating item records."""
 
     def __init__(self):
         """Instantiate database communication and Redis."""
         super().__init__()
         self.redis = broker.redis()
+        self.session = database.db.database_instance.get_session()
 
     def find_or_create(self, **kwargs):
         """Find or creates an item record based on the title."""
@@ -38,6 +39,7 @@ class Item(db):
         except NoResultFound:
             item = self.new(**kwargs)
 
+        self.session.close()
         return item
 
     def new(self, **kwargs):

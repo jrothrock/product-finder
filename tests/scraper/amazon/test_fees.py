@@ -12,7 +12,7 @@ from scraper.sites.amazon import fees
 
 
 @patch(
-    "database.db.Database._engine",
+    "database.db.Database._engine_url",
     MagicMock(return_value="sqlite:///database/test.sqlite"),
 )
 def _setup_mock_database_klass():
@@ -20,7 +20,8 @@ def _setup_mock_database_klass():
 
 
 def _remove_previous_db_records():
-    session = Database().session
+    db = Database()
+    session = db.get_session()
     session.query(CategoryDB).delete()
     session.close()
 
@@ -83,6 +84,8 @@ def test_run_category_fees():
 
     fees.AmazonFee.run_category_fees()
 
-    updated_category = Database().session.query(CategoryDB).get(int(new_category.id))
+    db = Database()
+    session = db.get_session()
+    updated_category = session.query(CategoryDB).get(int(new_category.id))
 
     assert updated_category.amazon_fee != 0

@@ -6,11 +6,11 @@ import statistics
 import time
 
 import broker
+import database.db
 import utils.language_utils as language_utils
 import utils.system as system
 import utils.unit_conversions as unit_conversions
 from database.db import Category as CategoryDB
-from database.db import Database
 from scraper.core.drivers import Driver
 
 CATEGORY_SHOPIFY_QUEUE = (
@@ -43,6 +43,7 @@ class AmazonCategory(Driver):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
         self.redis = broker.redis()
+        self.session = database.db.database_instance.get_session()
 
     def _check_categories(self):
         """Check the Amazon queue and process the categories."""
@@ -63,7 +64,7 @@ class AmazonCategory(Driver):
 
     def _get_amazon_category(self, category_id):
         """Scrape the amazon category and calculate needed values."""
-        category = Database().session.query(CategoryDB).get(int(category_id))
+        category = self.session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
         self.driver.get(
             "https://www.amazon.com/s?k=" + "+".join(key_words) + "&ref=nb_sb_noss"
@@ -121,8 +122,7 @@ class AmazonCategory(Driver):
             )
             category_dimensions_and_weight_dict = {}
 
-        session = Database().session
-        session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
+        self.session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
             {
                 "amazon_total_results": int(amazon_total_results),
                 "amazon_min_price": amazon_min_price,
@@ -154,8 +154,7 @@ class AmazonCategory(Driver):
                 ),
             }
         )
-        session.commit()
-        session.close()
+        self.session.commit()
         self.redis.rpush(CATEGORY_SHOPIFY_QUEUE, category.id)
 
         category_dimensions_and_weight_dict_values = (
