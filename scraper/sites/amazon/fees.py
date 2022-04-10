@@ -5,10 +5,10 @@ import time
 
 import broker
 import database.db
+import scraper.core.drivers
 import utils.mappings as mappings
 from database.db import Category as CategoryDB
 from database.db import Item as ItemDB
-from scraper.core.drivers import Driver
 
 ITEM_AMAZON_FEES_QUEUE = (
     "test:queue:item:amazon:fees" if os.getenv("TEST_ENV") else "queue:item:amazon:fees"
@@ -31,14 +31,14 @@ CATEGORY_AMAZON_FEES_QUEUE = (
 )
 
 
-class AmazonFee(Driver):
+class AmazonFee:
     """Class that holds procedures for scraping Amazon fees."""
 
     def __init__(self):
-        """Instantiate Selenium Driver and Redis."""
-        super().__init__()
+        """Set redis, database and driver instances."""
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
+        self.driver = scraper.core.drivers.driver_instance.get_driver()
 
     def _check_categories(self):
         """Check the Amazon category fees queue and process the categories."""

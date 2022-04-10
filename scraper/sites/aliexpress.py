@@ -5,24 +5,24 @@ import time
 
 import selenium
 
+import scraper.core.drivers
 import utils.language_utils as language_utils
 import utils.mappings as mappings
 from database.category import Category as CategoryModel
 from database.item import Item as ItemModel
 from scraper.core.drivers import EC
 from scraper.core.drivers import By
-from scraper.core.drivers import Driver
 from scraper.core.drivers import WebDriverWait
 
 
-class Aliexpress(Driver):
+class Aliexpress:
     """Class that holds procedures for scraping Aliexpress products."""
 
     def __init__(self):
-        """Instantiate Selenium Driver and Redis. Cache category and item models."""
-        super().__init__()
+        """Set needed instances."""
         self.category = CategoryModel()
         self.item = ItemModel()
+        self.driver = scraper.core.drivers.driver_instance.get_driver()
 
     def _scrape_pages(self):
         """Scrape Aliexpress pages and pull prductk links."""

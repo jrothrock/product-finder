@@ -18,12 +18,11 @@ ITEM_CALCULATOR_QUEUE = (
 )
 
 
-class Item(database.db.Database):
+class Item:
     """Class which holds procedures commonly used when creating item records."""
 
     def __init__(self):
         """Instantiate database communication and Redis."""
-        super().__init__()
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
