@@ -18,7 +18,7 @@ However, to give fairness to myself, this first started as a few scripts using S
 
 First off, the code should be wayyy more functional than it is. I use this weird classmethod to instantiate the class and use `__init__` to start things. Not a fan.
 
-Secondly, using a SQL database was the wrong move. I only have two tables in a predominantly write heavy workload. I probably should have gone with Cassandra.
+Secondly, using a RDBMS was the wrong move. I only have two tables in a predominantly write heavy workload. I probably should have gone with Cassandra.
 
 Thirdly, needs way higher test coverage. Ideally this would have 100% test coverage (not that 100% test coverage means the tests are good), but the current coverage is quite bad.
 
