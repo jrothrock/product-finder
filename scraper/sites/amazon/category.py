@@ -1,16 +1,38 @@
 """Module which scrapes the Amazon category."""
 import logging
+import os
 import re
 import statistics
 import time
 
 import broker
+import database.db
 import utils.language_utils as language_utils
-import utils.system as system
 import utils.unit_conversions as unit_conversions
 from database.db import Category as CategoryDB
-from database.db import Database
 from scraper.core.drivers import Driver
+
+CATEGORY_SHOPIFY_QUEUE = (
+    "test:queue:category:shopify" if os.getenv("TEST_ENV") else "queue:category:shopify"
+)
+
+CATEGORY_AMAZON_FEES_QUEUE = (
+    "test:queue:category:amazon:fees"
+    if os.getenv("TEST_ENV")
+    else "queue:category:amazon:fees"
+)
+
+CATEGORY_CALCULATOR_QUEUE = (
+    "test:queue:category:calculator"
+    if os.getenv("TEST_ENV")
+    else "queue:category:calculator"
+)
+
+CATEGORY_AMAZON_LISTINGS_QUEUE = (
+    "test:queue:category:amazon:listings"
+    if os.getenv("TEST_ENV")
+    else "queue:category:amazon:listings"
+)
 
 
 class AmazonCategory(Driver):
@@ -19,12 +41,13 @@ class AmazonCategory(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
+        self.session = database.db.database_instance.get_session()
 
     def _check_categories(self):
         """Check the Amazon queue and process the categories."""
-        category_ids = self.redis.lrange("queue:category:amazon:listings", 0, -1)
-        self.redis.delete("queue:category:amazon:listings")
+        category_ids = self.redis.lrange(CATEGORY_AMAZON_LISTINGS_QUEUE, 0, -1)
+        self.redis.delete(CATEGORY_AMAZON_LISTINGS_QUEUE)
         self._process_categories(category_ids)
 
     def _process_categories(self, category_ids):
@@ -32,15 +55,13 @@ class AmazonCategory(Driver):
         for category_id in category_ids:
             try:
                 self._get_amazon_category(category_id)
-            except KeyboardInterrupt:
-                system.exit()
             except Exception as e:
                 logging.exception(f"Exception scraping amazon categories: {e.__dict__}")
                 pass
 
     def _get_amazon_category(self, category_id):
         """Scrape the amazon category and calculate needed values."""
-        category = Database().session.query(CategoryDB).get(int(category_id))
+        category = self.session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
         self.driver.get(
             "https://www.amazon.com/s?k=" + "+".join(key_words) + "&ref=nb_sb_noss"
@@ -90,16 +111,13 @@ class AmazonCategory(Driver):
             category_dimensions_and_weight_dict = (
                 self._get_category_dimensions_and_weight()
             )
-        except KeyboardInterrupt:
-            system.exit()
         except Exception as e:
             logging.exception(
                 f"Exception getting category dimensions and weight: {e.__dict__}"
             )
             category_dimensions_and_weight_dict = {}
 
-        session = Database().session
-        session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
+        self.session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
             {
                 "amazon_total_results": int(amazon_total_results),
                 "amazon_min_price": amazon_min_price,
@@ -131,15 +149,16 @@ class AmazonCategory(Driver):
                 ),
             }
         )
-        session.commit()
-        session.close()
-        self.redis.rpush("queue:category:shopify", category.id)
+        self.session.commit()
+        self.redis.rpush(CATEGORY_SHOPIFY_QUEUE, category.id)
 
         category_dimensions_and_weight_dict_values = (
             category_dimensions_and_weight_dict.values()
         )
         if None not in category_dimensions_and_weight_dict_values:
-            self.redis.rpush("queue:category:amazon:fees", category.id)
+            self.redis.rpush(CATEGORY_AMAZON_FEES_QUEUE, category.id)
+        else:
+            self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, category.id)
 
     def _get_price_from_text(self, price_text):
         """Pull the numeric price from a text string."""
@@ -197,8 +216,6 @@ class AmazonCategory(Driver):
                 category_weights.append(
                     product_dimensions_and_weight.get("weight", None)
                 )
-            except KeyboardInterrupt:
-                system.exit()
             except Exception as e:
                 logging.exception(
                     f"Exception getting amazon product dimensions and weight: {e.__dict__}"

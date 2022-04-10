@@ -1,14 +1,34 @@
 """Module for scraping AmazonFees -- Category and Item."""
 import logging
+import os
 import time
 
 import broker
+import database.db
 import utils.mappings as mappings
-import utils.system as system
 from database.db import Category as CategoryDB
-from database.db import Database
 from database.db import Item as ItemDB
 from scraper.core.drivers import Driver
+
+ITEM_AMAZON_FEES_QUEUE = (
+    "test:queue:item:amazon:fees" if os.getenv("TEST_ENV") else "queue:item:amazon:fees"
+)
+
+ITEM_CALCULATOR_QUEUE = (
+    "test:queue:item:calculator" if os.getenv("TEST_ENV") else "queue:item:calculator"
+)
+
+CATEGORY_CALCULATOR_QUEUE = (
+    "test:queue:category:calculator"
+    if os.getenv("TEST_ENV")
+    else "queue:category:calculator"
+)
+
+CATEGORY_AMAZON_FEES_QUEUE = (
+    "test:queue:category:amazon:fees"
+    if os.getenv("TEST_ENV")
+    else "queue:category:amazon:fees"
+)
 
 
 class AmazonFee(Driver):
@@ -17,36 +37,42 @@ class AmazonFee(Driver):
     def __init__(self):
         """Instantiate Selenium Driver and Redis."""
         super().__init__()
-        self.redis = broker.redis_instance
+        self.redis = broker.redis()
+        self.session = database.db.database_instance.get_session()
 
     def _check_categories(self):
         """Check the Amazon category fees queue and process the categories."""
-        category_ids = self.redis.lrange("queue:category:amazon:fees", 0, -1)
-        self.redis.delete("queue:category:amazon:fees")
+        category_ids = self.redis.lrange(CATEGORY_AMAZON_FEES_QUEUE, 0, -1)
+        self.redis.delete(CATEGORY_AMAZON_FEES_QUEUE)
         self._process_record(category_ids, CategoryDB)
 
     def _check_items(self):
         """Check the Amazon item fees queue and process the items."""
-        item_ids = self.redis.lrange("queue:item:amazon:fees", 0, -1)
-        self.redis.delete("queue:item:amazon:fees")
+        item_ids = self.redis.lrange(ITEM_AMAZON_FEES_QUEUE, 0, -1)
+        self.redis.delete(ITEM_AMAZON_FEES_QUEUE)
         self._process_record(item_ids, ItemDB)
 
     def _process_record(self, record_ids, db_klass):
         for record_id in record_ids:
             try:
                 self._get_amazon(record_id, db_klass)
-            except KeyboardInterrupt:
-                system.exit()
             except Exception as e:
+                self._add_to_redis_queue(record_id, db_klass)
                 logging.exception(
-                    f"Exception scraping number of shopify sites: {e.__dict__}"
+                    f"Exception scraping amazon category fees: {e.__dict__}"
                 )
                 pass
+
+    def _add_to_redis_queue(self, record_id, db_klass):
+        if db_klass == ItemDB:
+            self.redis.rpush(ITEM_CALCULATOR_QUEUE, record_id)
+        else:
+            self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, record_id)
 
     def _get_amazon(self, record_id, db_klass):
         """Scrape the amazon page for a particular category or item."""
         time.sleep(1)
-        record = Database().session.query(db_klass).get(int(record_id))
+        record = self.session.query(db_klass).get(int(record_id))
         self.driver.get(
             "https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index?lang=en_US"
         )
@@ -111,16 +137,12 @@ class AmazonFee(Driver):
         amazon_fees = self.driver.find_element_by_id(
             "afn-seller-proceeds"
         ).get_attribute("value")
-        session = Database().session
-        session.query(db_klass).filter(db_klass.id == record.id).update(
+        self.session.query(db_klass).filter(db_klass.id == record.id).update(
             {"amazon_fee": float(amazon_fees[1:])}
         )
-        session.commit()
-        session.close()
-        if isinstance(record, ItemDB):
-            self.redis.rpush("queue:item:calculator", record.id)
-        else:
-            self.redis.rpush("queue:category:calculator", record.id)
+        self.session.commit()
+
+        self._add_to_redis_queue(record_id, db_klass)
 
         self.driver.delete_all_cookies()
 

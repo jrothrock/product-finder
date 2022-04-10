@@ -27,6 +27,7 @@ pydocstyle = "^6.1"
 pytest = "^6.2"
 toml = "^0.10"
 isort = "^5.10.1"
+pytest-env = "^0.6.2"
 
 [tool.black]
 exclude = ".venv"

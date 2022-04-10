@@ -7,7 +7,6 @@ import selenium
 
 import utils.language_utils as language_utils
 import utils.mappings as mappings
-import utils.system as system
 from database.category import Category as CategoryModel
 from database.item import Item as ItemModel
 from scraper.core.drivers import EC
@@ -50,8 +49,6 @@ class Aliexpress(Driver):
                 for link in urls:
                     try:
                         self._scrape_page(link, amazon_category)
-                    except KeyboardInterrupt:
-                        system.exit()
                     except selenium.common.exceptions.TimeoutException:
                         logging.exception(
                             "Timeout occurred on page. Items may not have been found. Passing"
@@ -102,8 +99,6 @@ class Aliexpress(Driver):
         try:
             shipping_price = self._scrape_shipping_price()
             shipping_price_10_units = self._scrape_shipping_price(ten_units=True)
-        except KeyboardInterrupt:
-            system.exit()
         except Exception as e:
             # TODO: Sometimes boxes will appear asking where to ship from.
             logging.exception(

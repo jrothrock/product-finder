@@ -1,14 +1,13 @@
 """Module that houses procedures and schemas for the database."""
 # Honestly, I should have gone with a non relational database.
+import atexit
 import os
 
-import sqlalchemy as db
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
-from sqlalchemy import MetaData
 from sqlalchemy import String
 from sqlalchemy import create_engine
 from sqlalchemy import func  # noqa: F401
@@ -86,15 +85,29 @@ class Category:
 class Database:
     """Class which sets up procedures used for communicating with database."""
 
-    def __init__(self):
-        """Instantiate communication with the database."""
-        self.db = db
-        engine = os.environ.get("DATABASE_URL", "sqlite:///database/test.sqlite")
-        conn_args = (
+    @classmethod
+    def _engine_url(cls):
+        """Will return the DATABASE_URL. Useful for mocking."""
+        return os.environ.get("DATABASE_URL", "sqlite:///database/finder.sqlite")
+
+    def _cleanup(self):
+        """Need to cleanup the db session if it still exists -- will prevent conn leakage."""
+        if hasattr(self, "session"):
+            self.session.close()
+
+    def _database_configurations(self):
+        """Will return the configuration when setting up the engine."""
+        configuration = (
             {} if os.environ.get("DATABASE_TYPE") else {"check_same_thread": False}
         )
 
-        self.engine = create_engine(engine, connect_args=conn_args)
+        return configuration
+
+    def __init__(self):
+        """Instantiate communication with the database."""
+        self.engine = create_engine(
+            self._engine_url(), connect_args=self._database_configurations()
+        )
         if not database_exists(self.engine.url):
             create_database(self.engine.url)
 
@@ -102,7 +115,18 @@ class Database:
         Base.metadata.create_all(
             self.engine, Base.metadata.tables.values(), checkfirst=True
         )
+
         self.connection = self.engine.connect()
-        self.metadata = MetaData()
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+
+        atexit.register(self._cleanup)
+
+    def get_session(self):
+        """Will return the session if it exists, if not it will create one."""
+        if not hasattr(self, "session"):
+            Session = sessionmaker(bind=self.engine)
+            self.session = Session()
+
+        return self.session
+
+
+database_instance = Database()
