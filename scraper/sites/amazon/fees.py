@@ -6,7 +6,6 @@ import time
 import broker
 import database.db
 import utils.mappings as mappings
-import utils.system as system
 from database.db import Category as CategoryDB
 from database.db import Item as ItemDB
 from scraper.core.drivers import Driver
@@ -57,8 +56,6 @@ class AmazonFee(Driver):
         for record_id in record_ids:
             try:
                 self._get_amazon(record_id, db_klass)
-            except KeyboardInterrupt:
-                system.exit()
             except Exception as e:
                 self._add_to_redis_queue(record_id, db_klass)
                 logging.exception(

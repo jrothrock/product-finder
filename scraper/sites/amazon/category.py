@@ -8,7 +8,6 @@ import time
 import broker
 import database.db
 import utils.language_utils as language_utils
-import utils.system as system
 import utils.unit_conversions as unit_conversions
 from database.db import Category as CategoryDB
 from scraper.core.drivers import Driver
@@ -56,8 +55,6 @@ class AmazonCategory(Driver):
         for category_id in category_ids:
             try:
                 self._get_amazon_category(category_id)
-            except KeyboardInterrupt:
-                system.exit()
             except Exception as e:
                 logging.exception(f"Exception scraping amazon categories: {e.__dict__}")
                 pass
@@ -114,8 +111,6 @@ class AmazonCategory(Driver):
             category_dimensions_and_weight_dict = (
                 self._get_category_dimensions_and_weight()
             )
-        except KeyboardInterrupt:
-            system.exit()
         except Exception as e:
             logging.exception(
                 f"Exception getting category dimensions and weight: {e.__dict__}"
@@ -221,8 +216,6 @@ class AmazonCategory(Driver):
                 category_weights.append(
                     product_dimensions_and_weight.get("weight", None)
                 )
-            except KeyboardInterrupt:
-                system.exit()
             except Exception as e:
                 logging.exception(
                     f"Exception getting amazon product dimensions and weight: {e.__dict__}"

@@ -6,7 +6,6 @@ import time
 
 import broker
 import database.db
-import utils.system as system
 from database.db import Category as CategoryDB
 from scraper.core.drivers import Driver
 
@@ -35,8 +34,6 @@ class ShopifyCategory(Driver):
         for category_id in category_ids:
             try:
                 self._get_shopify(category_id)
-            except KeyboardInterrupt:
-                system.exit()
             except Exception as e:
                 logging.exception(
                     f"Exception scraping number of shopify sites: {e.__dict__}"

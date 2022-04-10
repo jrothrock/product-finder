@@ -6,7 +6,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 import broker
 import database.db
-import utils.system as system
 import utils.unit_conversions as unit_conversions
 from database.db import Item as ItemDB
 
@@ -68,8 +67,6 @@ class Item(database.db.Database):
                     "unit_discounts", None
                 ),
             )
-        except KeyboardInterrupt:
-            system.exit()
         except Exception as e:
             logging.exception(f"Exception creating item: {e.__dict__}")
             pass
