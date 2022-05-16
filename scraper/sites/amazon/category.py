@@ -166,16 +166,19 @@ class AmazonCategory(Driver):
 
     def _get_number_of_products(self, number_of_products_text: str) -> float:
         """Pull the number of products for that category."""
-        return int(
-            re.search("of (over)?(.+) results", number_of_products_text)
-            .group(2)
-            .strip()
-            .replace(",", "")
-        )
+        if found_number_of_products := re.search(
+            "of (over)?(.+) results", number_of_products_text
+        ):
+            return int(found_number_of_products.group(2).strip().replace(",", ""))
+        else:
+            return 0
 
     def _get_review_from_text(self, review_text: str) -> float:
         """Pull the average review for a specific product."""
-        return float(re.search("(.+) (out|Stars)", review_text).group(1))
+        if found_stars := re.search("(.+) (out|Stars)", review_text):
+            return float(found_stars.group(1))
+        else:
+            return 0.0
 
     def _get_number_of_ratings_from_text(self, num_ratings_text: str) -> float:
         """Get the total number of ratings for a specific product."""
@@ -193,12 +196,14 @@ class AmazonCategory(Driver):
 
         return self._calculate_dimensions_and_weight(product_links)
 
-    def _calculate_dimensions_and_weight(self, product_links: list[str]) -> dict[str, float]:
+    def _calculate_dimensions_and_weight(
+        self, product_links: list[str]
+    ) -> dict[str, float]:
         """Perform calculations of dimensions and weight for an Amazon category."""
-        category_lengths = []
-        category_widths = []
-        category_heights = []
-        category_weights = []
+        category_lengths: list[float] = []
+        category_widths: list[float] = []
+        category_heights: list[float] = []
+        category_weights: list[float] = []
 
         # uses higher than 3 to eliminate sponsored products
         for product_link in product_links[4:8]:
@@ -207,14 +212,14 @@ class AmazonCategory(Driver):
                     self._get_amazon_product_dimensions_and_weight(product_link)
                 )
                 category_lengths.append(
-                    product_dimensions_and_weight.get("length", None)
+                    product_dimensions_and_weight.get("length", 0.0)
                 )
-                category_widths.append(product_dimensions_and_weight.get("width", None))
+                category_widths.append(product_dimensions_and_weight.get("width", 0.0))
                 category_heights.append(
-                    product_dimensions_and_weight.get("height", None)
+                    product_dimensions_and_weight.get("height", 0.0)
                 )
                 category_weights.append(
-                    product_dimensions_and_weight.get("weight", None)
+                    product_dimensions_and_weight.get("weight", 0.0)
                 )
             except Exception as e:
                 logging.exception(
@@ -231,28 +236,28 @@ class AmazonCategory(Driver):
         amazon_average_length = (
             (sum(category_lengths) / len(category_lengths))
             if len(category_lengths)
-            else None
+            else 0.0
         )
         amazon_average_width = (
             (sum(category_widths) / len(category_widths))
             if len(category_widths)
-            else None
+            else 0.0
         )
         amazon_average_height = (
             (sum(category_heights) / len(category_heights))
             if len(category_heights)
-            else None
+            else 0.0
         )
         amazon_deviation_dimensions = (
-            statistics.pstdev(category_dimensions) if len(category_dimensions) else None
+            statistics.pstdev(category_dimensions) if len(category_dimensions) else 0.0
         )
         amazon_average_weight = (
             (sum(category_weights) / len(category_weights))
             if len(category_weights)
-            else None
+            else 0.0
         )
         amazon_deviation_weight = (
-            statistics.pstdev(category_weights) if len(category_dimensions) else None
+            statistics.pstdev(category_weights) if len(category_dimensions) else 0.0
         )
 
         return {
@@ -273,21 +278,30 @@ class AmazonCategory(Driver):
         dimensions = language_utils.get_dimensions(
             product_details_elem.get_attribute("innerHTML")
         )
-        weight = language_utils.get_weight(
+        weights = language_utils.get_weight(
             product_details_elem.get_attribute("innerHTML")
         )
 
+        length: float = float(dimensions["length"])
+        width: float = float(dimensions["width"])
+        height: float = float(dimensions["height"])
+        dimension_measurement: str = str(dimensions["measurement"])
+
         length_in_inches = unit_conversions.convert_to_inches(
-            dimensions["length"], dimensions["measurement"]
+            length, dimension_measurement
         )
         width_in_inches = unit_conversions.convert_to_inches(
-            dimensions["width"], dimensions["measurement"]
+            width, dimension_measurement
         )
         height_in_inches = unit_conversions.convert_to_inches(
-            dimensions["height"], dimensions["measurement"]
+            height, dimension_measurement
         )
+
+        weight: float = float(weights["weight"])
+        weight_measurement: str = str(weights["measurement"])
+
         weight_in_pounds = unit_conversions.convert_to_pounds(
-            weight["weight"], weight["measurement"]
+            weight, weight_measurement
         )
 
         return {

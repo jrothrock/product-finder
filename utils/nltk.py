@@ -2,7 +2,7 @@
 import nltk
 
 
-def download_nltk_resources():
+def download_nltk_resources() -> None:
     """Install necessary nltk packages used for language utils."""
     nltk.download("stopwords")
     nltk.download("punkt")

@@ -2,6 +2,7 @@
 import logging
 import os
 import time
+import typing
 
 import broker
 import database.db
@@ -52,7 +53,11 @@ class AmazonFee(Driver):
         self.redis.delete(ITEM_AMAZON_FEES_QUEUE)
         self._process_record(item_ids, ItemDB)
 
-    def _process_record(self, record_ids: list[str], db_klass: ItemDB | CategoryDB):
+    def _process_record(
+        self,
+        record_ids: list[str],
+        db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB],
+    ):
         """
         Process the records and try and calculate the amazon fees for the record.
 
@@ -70,18 +75,22 @@ class AmazonFee(Driver):
                 )
                 pass
 
-    def _add_to_redis_queue(self, record_id: str, db_klass: ItemDB | CategoryDB) -> None:
+    def _add_to_redis_queue(
+        self, record_id: str, db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB]
+    ) -> None:
         """Add the record id to correct queue to have calculations (re)run on the record later."""
         if db_klass == ItemDB:
             self.redis.rpush(ITEM_CALCULATOR_QUEUE, record_id)
         else:
             self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, record_id)
 
-    def _get_amazon(self, record_id: str, db_klass: ItemDB | CategoryDB) -> None:
+    def _get_amazon(
+        self, record_id: str, db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB]
+    ) -> None:
         """
         Scrape the amazon page for a particular category or item.
 
-        Will also update the record with the calculated amazon fee -- can be either a 
+        Will also update the record with the calculated amazon fee -- can be either a
         item or category record.
         """
         time.sleep(1)

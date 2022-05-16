@@ -1,6 +1,7 @@
 """Module that houses procedures and schemas for the database."""
 # Honestly, I should have gone with a non relational database.
 import os
+import typing
 
 from sqlalchemy import Boolean
 from sqlalchemy import Column
@@ -10,9 +11,9 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import create_engine
 from sqlalchemy import func  # noqa: F401
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import registry
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database
 from sqlalchemy_utils import database_exists
 
@@ -90,12 +91,7 @@ class Database:
         """Will return the DATABASE_URL. Useful for mocking."""
         return os.environ.get("DATABASE_URL", "sqlite:///database/finder.sqlite")
 
-    def _cleanup(self):
-        """Need to cleanup the db session if it still exists -- will prevent conn leakage."""
-        if hasattr(self, "session"):
-            self.session.close()
-
-    def _database_configurations(self) -> dict[str, any]:
+    def _database_configurations(self) -> dict[str, typing.Any]:
         """Will return the configuration when setting up the engine."""
         configuration = (
             {} if os.environ.get("DATABASE_TYPE") else {"check_same_thread": False}
@@ -117,8 +113,6 @@ class Database:
         )
 
         self.connection = self.engine.connect()
-
-        atexit.register(self._cleanup)
 
     def get_session(self) -> Session:
         """Will return the session if it exists, if not it will create one."""

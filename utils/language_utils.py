@@ -33,13 +33,14 @@ def get_important_title_words(title: str, description: str) -> list[str]:
         return potential_list
 
 
-def get_dimensions(description: str) -> dict[str, str | int | None]:
+def get_dimensions(description: str) -> dict[str, str | float]:
     """Get the length, width, height and measurement (unit) from a body of text."""
     dimensions_regex = re.search(
         "([\d]+\.?[\d]?[\d]?)\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)",
         description,
         re.IGNORECASE,
     )
+
     if dimensions_regex:
         length = float(dimensions_regex.group(1))
         width = float(
@@ -55,6 +56,7 @@ def get_dimensions(description: str) -> dict[str, str | int | None]:
             "",
         ]
         measurement = next(match for match in measurement_options if match is not None)
+
         return {
             "length": length,
             "width": width,
@@ -62,8 +64,10 @@ def get_dimensions(description: str) -> dict[str, str | int | None]:
             "measurement": measurement,
         }
 
+    return {"length": 0.0, "width": 0.0, "height": 0.0, "measurement": "in"}
 
-def get_weight(description: str) -> dict[str, str | None]:
+
+def get_weight(description: str) -> dict[str, str | float]:
     """Get the weight and measurement (unit) from a body of text."""
     weight_regex = re.search(
         "(Weight|weight).+?([\d]+[\.]?[\d]?[\d]?)\s?(kg|g|lb|oz|pound|ounce)",
@@ -71,14 +75,14 @@ def get_weight(description: str) -> dict[str, str | None]:
         re.IGNORECASE,
     )
     if weight_regex:
-        weight = None if weight_regex.group(2) is None else float(weight_regex.group(2))
+        weight = 0.0 if weight_regex.group(2) is None else float(weight_regex.group(2))
         measurement = weight_regex.group(3)
         return {"weight": weight, "measurement": measurement}
 
-    return {"weight": None, "measurement": None}
+    return {"weight": 0.0, "measurement": "lb"}
 
 
-def get_unit_discounts(text: str) -> dict[str, int]:
+def get_unit_discounts(text: str) -> dict[str, float]:
     """Get the discounts applicable for the item when higher quantities ordered."""
     discounts_regex = re.search(
         ".*?([0-9]+)(%)?.*\(([0-9]+) (pieces|lots).*", text, re.IGNORECASE
@@ -90,9 +94,11 @@ def get_unit_discounts(text: str) -> dict[str, int]:
             else (float(discounts_regex.group(1)) / 100)
         )
         discount_amount = (
-            0 if discounts_regex.group(3) is None else int(discounts_regex.group(3))
+            0 if discounts_regex.group(3) is None else float(discounts_regex.group(3))
         )
         return {"discount": discount, "discount_amount": discount_amount}
+
+    return {"discount": 0.0, "discount_amount": 0.0}
 
 
 def get_units_available(text: str) -> int:

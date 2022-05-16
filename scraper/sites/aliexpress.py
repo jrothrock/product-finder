@@ -71,7 +71,7 @@ class Aliexpress(Driver):
                 time.sleep(1)
                 self.driver.find_element_by_class_name("next-next").click()
 
-    def _scrape_page(self, link: str, amazon_category: str) -> None:
+    def _scrape_page(self, link: str, amazon_category: int) -> None:
         """Scrape one of the product pages and pull neccessary values."""
         time.sleep(1)
         self.driver.get(link)
@@ -116,7 +116,7 @@ class Aliexpress(Driver):
             )
             unit_discounts = language_utils.get_unit_discounts(packaging_element.text)
         else:
-            unit_discounts = {"discount": 0, "discount_amount": 0}
+            unit_discounts = {"discount": 0.0, "discount_amount": 0.0}
 
         # Find or create the category if it doesn't exist
         # then create the item and assign it the category
@@ -151,13 +151,12 @@ class Aliexpress(Driver):
                 "uniform-banner-box-discounts"
             )
 
-        price_regex = re.search(".(\d+\.\d+).*", price_element.text, re.IGNORECASE)
-        if price_regex:
+        if price_regex := re.search(".(\d+\.\d+).*", price_element.text, re.IGNORECASE):
             return float(price_regex.group(1))
         else:
             return -1.0
 
-    def _scrape_shipping_price(self, ten_units:bool=False) -> float:
+    def _scrape_shipping_price(self, ten_units: bool = False) -> float:
         """Check the shipping prices for a particular product/page."""
         if ten_units is True:
             for _x in range(9):
@@ -174,8 +173,11 @@ class Aliexpress(Driver):
             price_regex = re.search(
                 ".(\d+\.\d+).*", shipping_price_element.text, re.IGNORECASE
             )
+
             if price_regex:
                 return float(price_regex.group(1))
+            else:
+                return 0.0
 
     @classmethod
     def run(cls):

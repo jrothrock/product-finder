@@ -56,10 +56,14 @@ class Category:
         """Create a category recored."""
         title = self._create_title(kwargs.pop("category_words"))
         title_version = self._title_cohort()
-        new_category = CategoryDB(title=title, title_version=title_version, **kwargs)
+
+        updated_arguments = {"title": title, "title_version": title_version, **kwargs}
+        new_category = CategoryDB(**updated_arguments)
         self.session.add(new_category)
         self.session.commit()
         self.session.refresh(new_category)
+
         self._add_to_redis_queue(new_category)
         self.session.close()
+
         return new_category

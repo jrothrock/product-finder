@@ -65,7 +65,7 @@ class Item:
                 unit_discount_minimum_volume=kwargs.get("unit_discounts", {}).get(
                     "unit_discounts", None
                 ),
-            )
+            )  # type: ignore
         except Exception as e:
             logging.exception(f"Exception creating item: {e.__dict__}")
             pass
@@ -77,7 +77,7 @@ class Item:
         return new_item
 
     # Need to save dimensions as inches
-    def _dimensions(self, values: dict[str, float]) -> dict[str, float]:
+    def _dimensions(self, values: dict[str, float | str]) -> dict[str, float]:
         """Normalize and convert dimensions when creating an item record."""
         # TODO investigate better regex to pull measurements
         if (
@@ -87,15 +87,15 @@ class Item:
         ):
             return {"length": 0.0, "width": 0.0, "height": 0.0}
 
-        length_in_inches = unit_conversions.convert_to_inches(
-            values["length"], values["measurement"]
-        )
-        width_in_inches = unit_conversions.convert_to_inches(
-            values["width"], values["measurement"]
-        )
-        height_in_inches = unit_conversions.convert_to_inches(
-            values["height"], values["measurement"]
-        )
+        length: float = float(values["length"])
+        width: float = float(values["width"])
+        height: float = float(values["height"])
+        measurement: str = str(values["measurement"])
+
+        length_in_inches = unit_conversions.convert_to_inches(length, measurement)
+        width_in_inches = unit_conversions.convert_to_inches(width, measurement)
+        height_in_inches = unit_conversions.convert_to_inches(height, measurement)
+
         return {
             "length": length_in_inches,
             "width": width_in_inches,
@@ -107,9 +107,10 @@ class Item:
         if values["weight"] is None or values["measurement"] is None:
             return 0.0
 
-        return unit_conversions.convert_to_pounds(
-            values["weight"], values["measurement"]
-        )
+        weight: float = float(values["weight"])
+        measurement: str = str(values["measurement"])
+
+        return unit_conversions.convert_to_pounds(weight, measurement)
 
     def _add_to_redis_queue(self, new_item: ItemDB) -> None:
         """Add item record id to Redis to be processed for Amazon fees or calculations."""

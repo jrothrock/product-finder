@@ -10,13 +10,13 @@ UNIT_CONVERSION_WEIGHT = {
 }
 
 
-def convert_to_inches(value: int, unit: str) -> float:
+def convert_to_inches(value: float, unit: str = "in") -> float:
     """Convert common measurement units to inches."""
     divisor = UNIT_CONVERSION_DIMENSIONS[unit.lower()]
     return value / divisor
 
 
-def convert_to_pounds(value: int, unit: str) -> float:
+def convert_to_pounds(value: float, unit: str = "lb") -> float:
     """Convert common weight measurement units to pounds."""
     divisor = UNIT_CONVERSION_WEIGHT[unit.lower()]
     return value / divisor

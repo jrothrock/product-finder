@@ -65,12 +65,10 @@ class ShopifyCategory(Driver):
 
     def _get_number_of_sites(self, number_of_sites_elem_text: str) -> int:
         """Get integer number of stores from text body."""
-        return int(
-            re.search("About (.+) results", number_of_sites_elem_text)
-            .group(1)
-            .strip()
-            .replace(",", "")
-        )
+        if found_results := re.search("About (.+) results", number_of_sites_elem_text):
+            return int(found_results.group(1).strip().replace(",", ""))
+        else:
+            return 0
 
     @classmethod
     def run(cls):
