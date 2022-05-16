@@ -44,13 +44,13 @@ class AmazonCategory(Driver):
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
-    def _check_categories(self):
+    def _check_categories(self) -> None:
         """Check the Amazon queue and process the categories."""
         category_ids = self.redis.lrange(CATEGORY_AMAZON_LISTINGS_QUEUE, 0, -1)
         self.redis.delete(CATEGORY_AMAZON_LISTINGS_QUEUE)
         self._process_categories(category_ids)
 
-    def _process_categories(self, category_ids):
+    def _process_categories(self, category_ids) -> None:
         """Check the Amazon category for the Amazon queue."""
         for category_id in category_ids:
             try:
@@ -59,8 +59,8 @@ class AmazonCategory(Driver):
                 logging.exception(f"Exception scraping amazon categories: {e.__dict__}")
                 pass
 
-    def _get_amazon_category(self, category_id):
-        """Scrape the amazon category and calculate needed values."""
+    def _get_amazon_category(self, category_id) -> None:
+        """Scrape the amazon category and calculate needed values, then update record in database."""
         category = self.session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
         self.driver.get(
@@ -160,11 +160,11 @@ class AmazonCategory(Driver):
         else:
             self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, category.id)
 
-    def _get_price_from_text(self, price_text):
+    def _get_price_from_text(self, price_text: str) -> float:
         """Pull the numeric price from a text string."""
         return float(price_text[1:-1].strip().replace(",", ""))
 
-    def _get_number_of_products(self, number_of_products_text):
+    def _get_number_of_products(self, number_of_products_text: str) -> float:
         """Pull the number of products for that category."""
         return int(
             re.search("of (over)?(.+) results", number_of_products_text)
@@ -173,11 +173,11 @@ class AmazonCategory(Driver):
             .replace(",", "")
         )
 
-    def _get_review_from_text(self, review_text):
+    def _get_review_from_text(self, review_text: str) -> float:
         """Pull the average review for a specific product."""
         return float(re.search("(.+) (out|Stars)", review_text).group(1))
 
-    def _get_number_of_ratings_from_text(self, num_ratings_text):
+    def _get_number_of_ratings_from_text(self, num_ratings_text: str) -> float:
         """Get the total number of ratings for a specific product."""
         return int(num_ratings_text.strip().replace(",", ""))
 
@@ -193,7 +193,7 @@ class AmazonCategory(Driver):
 
         return self._calculate_dimensions_and_weight(product_links)
 
-    def _calculate_dimensions_and_weight(self, product_links):
+    def _calculate_dimensions_and_weight(self, product_links: list[str]) -> dict[str, float]:
         """Perform calculations of dimensions and weight for an Amazon category."""
         category_lengths = []
         category_widths = []
@@ -264,7 +264,7 @@ class AmazonCategory(Driver):
             "amazon_deviation_weight": amazon_deviation_weight,
         }
 
-    def _get_amazon_product_dimensions_and_weight(self, url):
+    def _get_amazon_product_dimensions_and_weight(self, url: str) -> dict[str, float]:
         """Calculate dimensions and weight for Amazon product."""
         self.driver.get(url)
         product_details_elem = self.driver.find_element_by_xpath(

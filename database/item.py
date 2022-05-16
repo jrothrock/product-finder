@@ -26,7 +26,7 @@ class Item:
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
-    def find_or_create(self, **kwargs):
+    def find_or_create(self, **kwargs) -> ItemDB:
         """Find or creates an item record based on the title."""
         try:
             item = (
@@ -40,7 +40,7 @@ class Item:
         self.session.close()
         return item
 
-    def new(self, **kwargs):
+    def new(self, **kwargs) -> ItemDB:
         """Create an item recored."""
         dimensions_in_inches = self._dimensions(kwargs["dimensions"])
         weight = self._weight_in_pounds(kwargs["weight"])
@@ -77,7 +77,7 @@ class Item:
         return new_item
 
     # Need to save dimensions as inches
-    def _dimensions(self, values):
+    def _dimensions(self, values: dict[str, float]) -> dict[str, float]:
         """Normalize and convert dimensions when creating an item record."""
         # TODO investigate better regex to pull measurements
         if (
@@ -85,7 +85,7 @@ class Item:
             or values["measurement"] is None
             or values["measurement"] == ""
         ):
-            return {"length": 0, "width": 0, "height": 0}
+            return {"length": 0.0, "width": 0.0, "height": 0.0}
 
         length_in_inches = unit_conversions.convert_to_inches(
             values["length"], values["measurement"]
@@ -102,16 +102,16 @@ class Item:
             "height": height_in_inches,
         }
 
-    def _weight_in_pounds(self, values):
+    def _weight_in_pounds(self, values: dict[str, float]) -> float:
         """Normalize and convert weight when creating an item record."""
         if values["weight"] is None or values["measurement"] is None:
-            return 0
+            return 0.0
 
         return unit_conversions.convert_to_pounds(
             values["weight"], values["measurement"]
         )
 
-    def _add_to_redis_queue(self, new_item):
+    def _add_to_redis_queue(self, new_item: ItemDB) -> None:
         """Add item record id to Redis to be processed for Amazon fees or calculations."""
         if (
             new_item.length != 0

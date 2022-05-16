@@ -4,7 +4,7 @@ import re
 import nltk
 
 
-def _get_high_frequency_nouns(text):
+def _get_high_frequency_nouns(text: str) -> list[str]:
     """Get the highest frequency pronouns and nouns in a text string."""
     stop_words = set(nltk.corpus.stopwords.words("english"))
     word_tokens = nltk.word_tokenize(text)
@@ -20,7 +20,7 @@ def _get_high_frequency_nouns(text):
     return [word for (word, _frequency) in freq.most_common(5)]
 
 
-def get_important_title_words(title, description):
+def get_important_title_words(title: str, description: str) -> list[str]:
     """Get the most important nouns in the title and description text bodies."""
     high_frequency_description = _get_high_frequency_nouns(description)
     high_frequency_title = _get_high_frequency_nouns(title)
@@ -33,7 +33,7 @@ def get_important_title_words(title, description):
         return potential_list
 
 
-def get_dimensions(description):
+def get_dimensions(description: str) -> dict[str, str | int | None]:
     """Get the length, width, height and measurement (unit) from a body of text."""
     dimensions_regex = re.search(
         "([\d]+\.?[\d]?[\d]?)\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)?\s?([\*|x|X|\-])?\s?([\d]+\.?[\d]?[\d]?)?\s?(cm|in|mm)",
@@ -63,7 +63,7 @@ def get_dimensions(description):
         }
 
 
-def get_weight(description):
+def get_weight(description: str) -> dict[str, str | None]:
     """Get the weight and measurement (unit) from a body of text."""
     weight_regex = re.search(
         "(Weight|weight).+?([\d]+[\.]?[\d]?[\d]?)\s?(kg|g|lb|oz|pound|ounce)",
@@ -78,7 +78,7 @@ def get_weight(description):
     return {"weight": None, "measurement": None}
 
 
-def get_unit_discounts(text):
+def get_unit_discounts(text: str) -> dict[str, int]:
     """Get the discounts applicable for the item when higher quantities ordered."""
     discounts_regex = re.search(
         ".*?([0-9]+)(%)?.*\(([0-9]+) (pieces|lots).*", text, re.IGNORECASE
@@ -95,7 +95,7 @@ def get_unit_discounts(text):
         return {"discount": discount, "discount_amount": discount_amount}
 
 
-def get_units_available(text):
+def get_units_available(text: str) -> int:
     """Get the units available for the paricular item / body of text."""
     available_regex = re.search(".*?([0-9]+).*", text, re.IGNORECASE)
     if available_regex:

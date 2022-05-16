@@ -37,6 +37,6 @@ class Driver(object):
 
         atexit.register(self._close_driver)
 
-    def _close_driver(self):
+    def _close_driver(self) -> None:
         if hasattr(self, "driver"):
             self.driver.quit()

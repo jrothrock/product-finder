@@ -12,6 +12,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import func  # noqa: F401
 from sqlalchemy.orm import registry
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database
 from sqlalchemy_utils import database_exists
 
@@ -85,11 +86,16 @@ class Database:
     """Class which sets up procedures used for communicating with database."""
 
     @classmethod
-    def _engine_url(cls):
+    def _engine_url(cls) -> str:
         """Will return the DATABASE_URL. Useful for mocking."""
         return os.environ.get("DATABASE_URL", "sqlite:///database/finder.sqlite")
 
-    def _database_configurations(self):
+    def _cleanup(self):
+        """Need to cleanup the db session if it still exists -- will prevent conn leakage."""
+        if hasattr(self, "session"):
+            self.session.close()
+
+    def _database_configurations(self) -> dict[str, any]:
         """Will return the configuration when setting up the engine."""
         configuration = (
             {} if os.environ.get("DATABASE_TYPE") else {"check_same_thread": False}
@@ -112,11 +118,13 @@ class Database:
 
         self.connection = self.engine.connect()
 
-    def get_session(self):
+        atexit.register(self._cleanup)
+
+    def get_session(self) -> Session:
         """Will return the session if it exists, if not it will create one."""
         if not hasattr(self, "session"):
-            Session = sessionmaker(bind=self.engine)
-            self.session = Session()
+            session = sessionmaker(bind=self.engine)
+            self.session = session()
 
         return self.session
 

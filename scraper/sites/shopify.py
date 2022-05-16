@@ -23,13 +23,13 @@ class ShopifyCategory(Driver):
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
-    def _check_categories(self):
+    def _check_categories(self) -> None:
         """Check the Shopify category queue and process categories."""
         category_ids = self.redis.lrange(CATEGORY_SHOPIFY_QUEUE, 0, -1)
         self.redis.delete(CATEGORY_SHOPIFY_QUEUE)
         self._process_categories(category_ids)
 
-    def _process_categories(self, category_ids):
+    def _process_categories(self, category_ids) -> None:
         """Process the shopify categories."""
         for category_id in category_ids:
             try:
@@ -40,7 +40,7 @@ class ShopifyCategory(Driver):
                 )
                 pass
 
-    def _get_shopify(self, category_id):
+    def _get_shopify(self, category_id: str) -> None:
         """Pull the shopify store count for a particular category from Google."""
         category = self.session.query(CategoryDB).get(int(category_id))
         key_words = category.title.split("_")
@@ -63,7 +63,7 @@ class ShopifyCategory(Driver):
         )
         self.session.commit()
 
-    def _get_number_of_sites(self, number_of_sites_elem_text):
+    def _get_number_of_sites(self, number_of_sites_elem_text: str) -> int:
         """Get integer number of stores from text body."""
         return int(
             re.search("About (.+) results", number_of_sites_elem_text)
