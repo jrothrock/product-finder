@@ -26,7 +26,7 @@ class Driver(object):
             "pageLoadStrategy"
         ] = "eager"  # don't freeze on 3rd party scripts taking a while to load.
 
-        # Bad
+        # Not ideal, see the following issue: https://github.com/jrothrock/product-finder/issues/31
         os.system("pkill -f firefox")
 
         self.driver = webdriver.Firefox(
@@ -37,6 +37,6 @@ class Driver(object):
 
         atexit.register(self._close_driver)
 
-    def _close_driver(self):
+    def _close_driver(self) -> None:
         if hasattr(self, "driver"):
             self.driver.quit()

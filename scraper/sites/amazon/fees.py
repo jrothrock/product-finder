@@ -2,6 +2,7 @@
 import logging
 import os
 import time
+import typing
 
 import broker
 import database.db
@@ -40,19 +41,30 @@ class AmazonFee(Driver):
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
-    def _check_categories(self):
+    def _check_categories(self) -> None:
         """Check the Amazon category fees queue and process the categories."""
         category_ids = self.redis.lrange(CATEGORY_AMAZON_FEES_QUEUE, 0, -1)
         self.redis.delete(CATEGORY_AMAZON_FEES_QUEUE)
         self._process_record(category_ids, CategoryDB)
 
-    def _check_items(self):
+    def _check_items(self) -> None:
         """Check the Amazon item fees queue and process the items."""
         item_ids = self.redis.lrange(ITEM_AMAZON_FEES_QUEUE, 0, -1)
         self.redis.delete(ITEM_AMAZON_FEES_QUEUE)
         self._process_record(item_ids, ItemDB)
 
-    def _process_record(self, record_ids, db_klass):
+    def _process_record(
+        self,
+        record_ids: list[str],
+        db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB],
+    ):
+        """
+        Process the records and try and calculate the amazon fees for the record.
+
+        If the fee can't be calculated, add it to calculation queue anyways, the
+        calculation task can handle the null values -- though ideally the record would
+        have them.
+        """
         for record_id in record_ids:
             try:
                 self._get_amazon(record_id, db_klass)
@@ -63,14 +75,24 @@ class AmazonFee(Driver):
                 )
                 pass
 
-    def _add_to_redis_queue(self, record_id, db_klass):
+    def _add_to_redis_queue(
+        self, record_id: str, db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB]
+    ) -> None:
+        """Add the record id to correct queue to have calculations (re)run on the record later."""
         if db_klass == ItemDB:
             self.redis.rpush(ITEM_CALCULATOR_QUEUE, record_id)
         else:
             self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, record_id)
 
-    def _get_amazon(self, record_id, db_klass):
-        """Scrape the amazon page for a particular category or item."""
+    def _get_amazon(
+        self, record_id: str, db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB]
+    ) -> None:
+        """
+        Scrape the amazon page for a particular category or item.
+
+        Will also update the record with the calculated amazon fee -- can be either a
+        item or category record.
+        """
         time.sleep(1)
         record = self.session.query(db_klass).get(int(record_id))
         self.driver.get(

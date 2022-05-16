@@ -45,13 +45,13 @@ class CategoryCalculator:
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
-    def _check_categories(self):
+    def _check_categories(self) -> None:
         """Check for categories that need to have calculations performed."""
         category_ids = self.redis.lrange(CATEGORY_CALCULATOR_QUEUE, 0, -1)
         self.redis.delete(CATEGORY_CALCULATOR_QUEUE)
         self._process_categories(category_ids)
 
-    def _process_categories(self, category_ids):
+    def _process_categories(self, category_ids: list[str]) -> None:
         """Process categories and perform profitability calculations."""
         for category_id in category_ids:
             try:
@@ -60,8 +60,8 @@ class CategoryCalculator:
                 logging.exception(f"Exception calculations catgory: {e.__dict__}")
                 pass
 
-    def _calculate_category(self, category_id):
-        """Perform calculations on a category."""
+    def _calculate_category(self, category_id: str) -> None:
+        """Perform calculations on a category then updates the record."""
         category = self.session.query(CategoryDB).get(int(category_id))
         calculated_shipping_cost = self._calculate_shipping_cost(category_id)
         # will probably need to circle back on this. Probably too low of a breakeven.
@@ -82,7 +82,7 @@ class CategoryCalculator:
         )
         self.session.commit()
 
-    def _calculate_shipping_cost(self, category_id):
+    def _calculate_shipping_cost(self, category_id: str) -> float:
         """Calculate shipping costs for a particular category."""
         records = (
             self.session.query(ItemDB, CategoryDB)
@@ -95,7 +95,7 @@ class CategoryCalculator:
             shipping_costs.append(record.Item.shipping_price)
 
         average_shipping_cost = (
-            sum(shipping_costs) / len(shipping_costs) if len(shipping_costs) else None
+            sum(shipping_costs) / len(shipping_costs) if len(shipping_costs) else 0.0
         )
         return average_shipping_cost
 
@@ -113,13 +113,13 @@ class ItemCalculator:
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
-    def _check_items(self):
+    def _check_items(self) -> None:
         """Check for items that need to have calculations performed."""
         item_ids = self.redis.lrange(ITEM_CALCULATOR_QUEUE, 0, -1)
         self.redis.delete(ITEM_CALCULATOR_QUEUE)
         self._process_items(item_ids)
 
-    def _process_items(self, item_ids):
+    def _process_items(self, item_ids: list[str]) -> None:
         """Process items and perform profitability calculations."""
         for item_id in item_ids:
             try:
@@ -128,8 +128,8 @@ class ItemCalculator:
                 logging.exception(f"Exception calculations item: {e.__dict__}")
                 pass
 
-    def _calculate_item(self, item_id):
-        """Perform calculations on an item."""
+    def _calculate_item(self, item_id) -> None:
+        """Perform calculations on an item and updates the record."""
         item = self.session.query(ItemDB).get(int(item_id))
         break_even_sale_price = item.price + item.shipping_price
         break_even_amazon_sale_price = (

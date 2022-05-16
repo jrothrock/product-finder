@@ -12,6 +12,7 @@ def audit():
         "flake8 . --count --exclude=.venv --ignore=W605,W503,W504,E501 --max-complexity=10 --statistics"
     )
     os.system("isort .")
+    os.system("mypy .")
     os.system("python -m pytest")
 
 
