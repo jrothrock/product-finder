@@ -6,22 +6,22 @@ import time
 
 import broker
 import database.db
-import scraper.core.drivers
 from database.db import Category as CategoryDB
+from scraper.core.drivers import Driver
 
 CATEGORY_SHOPIFY_QUEUE = (
     "test:queue:category:shopify" if os.getenv("TEST_ENV") else "queue:category:shopify"
 )
 
 
-class ShopifyCategory:
+class ShopifyCategory(Driver):
     """Class that holds procedures for scraping Shopify store counts."""
 
     def __init__(self):
-        """Set database, redis, and driver instances."""
+        """Instantiate Selenium Driver and Redis."""
+        super().__init__()
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
-        self.driver = scraper.core.drivers.driver_instance.get_driver()
 
     def _check_categories(self):
         """Check the Shopify category queue and process categories."""

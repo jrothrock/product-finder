@@ -7,10 +7,10 @@ import time
 
 import broker
 import database.db
-import scraper.core.drivers
 import utils.language_utils as language_utils
 import utils.unit_conversions as unit_conversions
 from database.db import Category as CategoryDB
+from scraper.core.drivers import Driver
 
 CATEGORY_SHOPIFY_QUEUE = (
     "test:queue:category:shopify" if os.getenv("TEST_ENV") else "queue:category:shopify"
@@ -35,14 +35,14 @@ CATEGORY_AMAZON_LISTINGS_QUEUE = (
 )
 
 
-class AmazonCategory:
+class AmazonCategory(Driver):
     """Class that holds procedures for scraping Amazon categories."""
 
     def __init__(self):
-        """Set redis, database and driver instances."""
+        """Instantiate Selenium Driver and Redis."""
+        super().__init__()
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
-        self.driver = scraper.core.drivers.driver_instance.get_driver()
 
     def _check_categories(self):
         """Check the Amazon queue and process the categories."""
