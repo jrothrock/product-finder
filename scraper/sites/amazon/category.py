@@ -284,7 +284,7 @@ class AmazonCategory(Driver):
 
         length: float = float(dimensions["length"])
         width: float = float(dimensions["width"])
-        height: float = float(dimensions["height"])
+        height: str = float(dimensions["height"])
         dimension_measurement: str = str(dimensions["measurement"])
 
         length_in_inches = unit_conversions.convert_to_inches(
