@@ -14,12 +14,11 @@ CATEGORY_AMAZON_LISTINGS_QUEUE = (
 )
 
 
-class Category(database.db.Database):
+class Category:
     """Class which holds procedures commonly used when creating category records."""
 
     def __init__(self):
         """Instantiate database communication and Redis."""
-        super().__init__()
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 

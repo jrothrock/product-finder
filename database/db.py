@@ -1,6 +1,5 @@
 """Module that houses procedures and schemas for the database."""
 # Honestly, I should have gone with a non relational database.
-import atexit
 import os
 
 from sqlalchemy import Boolean
@@ -90,11 +89,6 @@ class Database:
         """Will return the DATABASE_URL. Useful for mocking."""
         return os.environ.get("DATABASE_URL", "sqlite:///database/finder.sqlite")
 
-    def _cleanup(self):
-        """Need to cleanup the db session if it still exists -- will prevent conn leakage."""
-        if hasattr(self, "session"):
-            self.session.close()
-
     def _database_configurations(self):
         """Will return the configuration when setting up the engine."""
         configuration = (
@@ -118,8 +112,6 @@ class Database:
 
         self.connection = self.engine.connect()
 
-        atexit.register(self._cleanup)
-
     def get_session(self):
         """Will return the session if it exists, if not it will create one."""
         if not hasattr(self, "session"):
@@ -127,6 +119,11 @@ class Database:
             self.session = Session()
 
         return self.session
+
+    def cleanup(self):
+        """Need to cleanup the db session if it still exists."""
+        if hasattr(self, "session"):
+            self.session.close()
 
 
 database_instance = Database()

@@ -26,6 +26,9 @@ class Driver(object):
             "pageLoadStrategy"
         ] = "eager"  # don't freeze on 3rd party scripts taking a while to load.
 
+        # Bad
+        os.system("pkill -f firefox")
+
         self.driver = webdriver.Firefox(
             firefox_options=options,
             desired_capabilities=self.caps,
