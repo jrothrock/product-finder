@@ -10,19 +10,17 @@ to the pronouns and nouns. For example, "red stuffed elephant" is quite differen
 There is a title versioning column on the categories that can be updated for this reason.
 
 # Design
-The more I've progressed through this project, the more I dislike how I did things. 
+The more I've progressed through this project, the more I dislike how I did/wrote things. 
 
 However, to give fairness to myself, this first started as a few scripts using SQLAlchemy writing to a sqlite database.
 
 **Things that for sure need to be improved:**
 
-First off, the code should be wayyy more functional than it is. I use this weird classmethod to instantiate the class and use `__init__` to start things. Not a fan.
+First off, the code should probably be more functional than it is. I use these weird classmethod to instantiate the class which could just be modular functions.
 
 Secondly, using a RDBMS was the wrong move. I only have two tables in a predominantly write heavy workload. I probably should have gone with Cassandra.
 
-Thirdly, needs way higher test coverage. Ideally this would have 100% test coverage (not that 100% test coverage means the tests are good), but the current coverage is quite bad.
-
-Fourth, type hints. Adding type hints would be better for the long term and revisiting this.
+Thirdly, needs higher test coverage. This is hard to do given the nature of scraping, as there are known exceptions that do occur under certain scenarios.
 
 ## Local
 
@@ -84,7 +82,7 @@ This uses `s-2vcpu-2gb` - a $15 droplet. It's pretty much not possible to run th
 
 * Get logs from a container:
 
-`docker-compose -f ~/deploys/current/production/docker-compose.production.yml logs db`
+`docker-compose -f ~/deploys/current/production/docker-compose.production.yml logs --tail 250 celery`
 
 * Access the shell of a container (note, cache/redis uses Alpine which doesn't have bash and will need `/bin/sh`)
 
