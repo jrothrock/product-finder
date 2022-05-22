@@ -81,8 +81,8 @@ def calculate_all():
 
 
 @task_postrun.connect
-def reap_child_processes(**kwargs):
-    """DIRTY! Will reap all child processes after each task runs."""
+def kill_child_processes(**kwargs):
+    """Will kill all child processes after each task runs."""
     # See the following issues:
     #  * https://github.com/celery/celery/issues/2353
     #  * https://github.com/jrothrock/product-finder/issues/31
