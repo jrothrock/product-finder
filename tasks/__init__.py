@@ -1,6 +1,5 @@
 """Background tasks subpackage used for periodicly scraping product sites."""
 import os
-import logging
 
 from celery import Celery
 from celery.schedules import crontab
@@ -80,6 +79,7 @@ def calculate_all():
     """Periodic tasks to run calculations on all products."""
     calculator.calculate_all()
 
+
 @task_postrun.connect
 def reap_child_processes(**kwargs):
     """DIRTY! Will reap all child processes after each task runs."""
@@ -90,4 +90,4 @@ def reap_child_processes(**kwargs):
     process_id = os.getpid()
     process = Process(process_id)
     for child in process.children(recursive=True):
-      child.kill()
+        child.kill()
