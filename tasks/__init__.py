@@ -1,6 +1,11 @@
 """Background tasks subpackage used for periodicly scraping product sites."""
+import os
+import logging
+
 from celery import Celery
 from celery.schedules import crontab
+from celery.signals import task_postrun
+from psutil import Process
 
 import broker
 import calculator
@@ -74,3 +79,15 @@ def scrape_all():
 def calculate_all():
     """Periodic tasks to run calculations on all products."""
     calculator.calculate_all()
+
+@task_postrun.connect
+def reap_child_processes(**kwargs):
+    """DIRTY! Will reap all child processes after each task runs."""
+    # See the following issues:
+    #  * https://github.com/celery/celery/issues/2353
+    #  * https://github.com/jrothrock/product-finder/issues/31
+    # We need to kill all spawned child processes -- mainly firefox.
+    process_id = os.getpid()
+    process = Process(process_id)
+    for child in process.children(recursive=True):
+      child.kill()
