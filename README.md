@@ -34,6 +34,7 @@ To start the application:
 1. `pip3 install poetry`
 2. `poetry install`
 3. `poetry run start`
+4. `celery -A tasks worker -l info`
 
 ### Docker
 Requires both docker and docker-compose. Records will be stored in postgreSQL.
