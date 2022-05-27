@@ -35,7 +35,9 @@ class Aliexpress(Driver):
                 .get("aliexpress_url", None)
             )
             self.driver.get(amazon_url)
+
             amazon_category = int(category_id)
+
             pages = 0
             while True:
                 current_url = self.driver.current_url
@@ -68,6 +70,7 @@ class Aliexpress(Driver):
 
                 if pages >= 1:
                     break
+
                 time.sleep(1)
                 self.driver.find_element_by_class_name("next-next").click()
 
@@ -154,7 +157,7 @@ class Aliexpress(Driver):
         if price_regex := re.search(".(\d+\.\d+).*", price_element.text, re.IGNORECASE):
             return float(price_regex.group(1))
         else:
-            return -1.0
+            return 0.0
 
     def _scrape_shipping_price(self, ten_units: bool = False) -> float:
         """Check the shipping prices for a particular product/page."""

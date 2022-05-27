@@ -1,4 +1,4 @@
-"""Subpackage used for instantiating caching."""
+"""Subpackage used for instantiating broker."""
 import os
 
 import redis as redis_import

@@ -66,23 +66,28 @@ class AmazonCategory(Driver):
         self.driver.get(
             "https://www.amazon.com/s?k=" + "+".join(key_words) + "&ref=nb_sb_noss"
         )
+
         time.sleep(2)
+
         number_of_products_elem = self.driver.find_element_by_xpath(
             "//div[contains(@class, 's-breadcrumb')]//div[contains(@class, 'a-spacing-top-small')]/*[1]"
         ).text
         amazon_total_results = self._get_number_of_products(number_of_products_elem)
+
         prices = [
             self._get_price_from_text(price_elem.get_attribute("innerHTML"))
             for price_elem in self.driver.find_elements_by_xpath(
                 "//span[contains(@class, 'a-price')]//span[contains(@class, 'a-offscreen')]"
             )
         ]
+
         ratings = [
             self._get_review_from_text(rating_elem.get_attribute("innerHTML"))
             for rating_elem in self.driver.find_elements_by_xpath(
                 "//div[contains(@class, 's-result-item')]//span[contains(@class, 'a-icon-alt')]"
             )
         ]
+
         number_of_ratings = [
             self._get_number_of_ratings_from_text(
                 num_rating_elem.get_attribute("innerHTML")
@@ -91,9 +96,11 @@ class AmazonCategory(Driver):
                 "//div[contains(@class, 's-result-list')]//div[contains(@class, 'a-section')]//div[contains(@class, 'a-row')]//span/a[contains(@class, 'a-link-normal')]//span[contains(@class, 'a-size-base')]"
             )
         ]
+
         prices = list(filter(lambda x: x is not None, prices))
         ratings = list(filter(lambda x: x is not None, ratings))
         number_of_ratings = list(filter(lambda x: x is not None, number_of_ratings))
+
         amazon_min_price = min(prices) if len(prices) else None
         amazon_max_price = max(prices) if len(prices) else None
         amazon_deviation_price = statistics.pstdev(prices) if len(prices) else None
@@ -107,6 +114,7 @@ class AmazonCategory(Driver):
             if len(number_of_ratings)
             else None
         )
+
         try:
             category_dimensions_and_weight_dict = (
                 self._get_category_dimensions_and_weight()
@@ -272,6 +280,7 @@ class AmazonCategory(Driver):
     def _get_amazon_product_dimensions_and_weight(self, url: str) -> dict[str, float]:
         """Calculate dimensions and weight for Amazon product."""
         self.driver.get(url)
+
         product_details_elem = self.driver.find_element_by_xpath(
             "//table[contains(@id, 'productDetails_detailBullets_sections1')]"
         )

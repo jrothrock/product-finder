@@ -156,6 +156,7 @@ class AmazonFee(Driver):
         )
 
         time.sleep(1)
+
         amazon_fees = self.driver.find_element_by_id(
             "afn-seller-proceeds"
         ).get_attribute("value")
