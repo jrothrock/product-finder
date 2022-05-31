@@ -19,6 +19,7 @@ However, to give fairness to myself, this first started as a few scripts using S
 **Things that for sure need to be improved:**
 
 While there are many things that need to be improved, here are a few that are pretty big takeaways from this:
+
 First off, using a RDBMS was the wrong move. I only have two tables in a predominantly write heavy workload. I probably should have gone with Cassandra.
 
 Secondly, having higher test coverage. This is hard to do given the nature of scraping, as there are known exceptions that do occur under certain scenarios.
