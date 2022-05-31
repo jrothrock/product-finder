@@ -43,6 +43,10 @@ Requires both docker and docker-compose. Records will be stored in postgreSQL.
 1. `docker-compose up -d --force-recreate`
 
 ### Testing
+To run test suite, formatters and linters:
+
+`poetry run audit`
+
 Some tests have been marked to be skipped as full mocking for them hasn't been completed.
 
 To run these tests alongside the rest of the test suite (will require a local redis-server running):
