@@ -5,10 +5,10 @@ from unittest.mock import patch
 import pytest
 
 import broker
+import scraper.sites.shopify as shopify
 from database.category import Category as CategoryModel
 from database.db import Category as CategoryDB
 from database.db import Database
-from scraper.sites.shopify import ShopifyCategory
 
 
 @patch(
@@ -86,7 +86,7 @@ def test_run():
 
     assert category.number_of_shopify_sites == 0
 
-    ShopifyCategory.run()
+    shopify.scrape_categories()
 
     db = Database()
     session = db.get_session()

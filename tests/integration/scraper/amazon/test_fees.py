@@ -5,10 +5,10 @@ from unittest.mock import patch
 import pytest
 
 import broker
+import scraper.sites.amazon.fees
 from database.category import Category as CategoryModel
 from database.db import Category as CategoryDB
 from database.db import Database
-from scraper.sites.amazon import fees
 
 
 @patch(
@@ -82,7 +82,7 @@ def _setup_test():
 def test_run_category_fees():
     new_category = _setup_test()
 
-    fees.AmazonFee.run_category_fees()
+    scraper.sites.amazon.fees.scrape_category_fees()
 
     db = Database()
     session = db.get_session()

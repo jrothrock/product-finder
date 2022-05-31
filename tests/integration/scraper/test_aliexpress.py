@@ -5,11 +5,11 @@ from unittest.mock import patch
 import pytest
 
 import broker
+import scraper.sites.aliexpress
 from database.db import Category as CategoryDB
 from database.db import Database
 from database.db import Item as ItemDB
 from database.db import func
-from scraper.sites.aliexpress import Aliexpress
 
 
 @patch(
@@ -53,7 +53,7 @@ def test_run():
     _setup_test()
     assert len(broker.redis().lrange("test:queue:item:amazon:fees", 0, -1)) == 0
 
-    Aliexpress.run()
+    scraper.sites.aliexpress.scrape_pages()
 
     db = Database()
     session = db.get_session()

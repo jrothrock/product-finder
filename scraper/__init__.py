@@ -1,29 +1,29 @@
-"""Subpack that holds all of the modules used for scraping various sites."""
-from scraper.sites.aliexpress import Aliexpress
-from scraper.sites.amazon.category import AmazonCategory
-from scraper.sites.amazon.fees import AmazonFee
-from scraper.sites.shopify import ShopifyCategory
+"""Subpackage that holds all of the modules used for scraping various sites."""
+import scraper.sites.aliexpress
+import scraper.sites.amazon.category
+import scraper.sites.amazon.fees
+import scraper.sites.shopify
 
 
 def scrape_aliexpress():
     """Easy to use interface to run Aliexpress scraper."""
-    Aliexpress.run()
+    scraper.sites.aliexpress.scrape_pages()
 
 
 def scrape_amazon_fees():
     """Easy to use interface to run Amazon fees scraper."""
-    AmazonFee.run_category_fees()
-    AmazonFee.run_item_fees()
+    scraper.sites.amazon.fees.scrape_category_fees()
+    scraper.sites.amazon.fees.scrape_item_fees()
 
 
 def scrape_amazon_categories():
     """Easy to use interface to run Amazon categories scraper."""
-    AmazonCategory.run()
+    scraper.sites.amazon.category.scrape_amazon_categories()
 
 
 def scrape_shopify_categories():
     """Easy to use interface to run Shopify sites count scraper."""
-    ShopifyCategory.run()
+    scraper.sites.shopify.scrape_categories()
 
 
 def scrape_all():

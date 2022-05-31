@@ -34,6 +34,11 @@ class Driver(object):
 
         atexit.register(self._close_driver)
 
+    def get_driver(self):
+        """Will return the current firefox driver."""
+        return self.driver
+
     def _close_driver(self) -> None:
+        """Will close the driver."""
         if hasattr(self, "driver"):
             self.driver.quit()
