@@ -45,43 +45,6 @@ class CategoryCalculator:
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
 
-    def _check_categories(self) -> None:
-        """Check for categories that need to have calculations performed."""
-        category_ids = self.redis.lrange(CATEGORY_CALCULATOR_QUEUE, 0, -1)
-        self.redis.delete(CATEGORY_CALCULATOR_QUEUE)
-        self._process_categories(category_ids)
-
-    def _process_categories(self, category_ids: list[str]) -> None:
-        """Process categories and perform profitability calculations."""
-        for category_id in category_ids:
-            try:
-                self._calculate_category(category_id)
-            except Exception as e:
-                logging.exception(f"Exception calculations catgory: {e.__dict__}")
-                pass
-
-    def _calculate_category(self, category_id: str) -> None:
-        """Perform calculations on a category then updates the record."""
-        category = self.session.query(CategoryDB).get(int(category_id))
-        calculated_shipping_cost = self._calculate_shipping_cost(category_id)
-        # will probably need to circle back on this. Probably too low of a breakeven.
-        estimated_shipping_cost = (
-            calculated_shipping_cost
-            if calculated_shipping_cost
-            else category.amazon_average_price * 0.1
-        )
-        average_min_break_even = (
-            category.amazon_average_price - estimated_shipping_cost
-        ) * (1 - GROSS_MARGIN_PERCENTAGE)
-        average_min_break_even_amazon = average_min_break_even + category.amazon_fee
-        self.session.query(CategoryDB).filter(CategoryDB.id == int(category_id)).update(
-            {
-                "average_min_break_even": average_min_break_even,
-                "average_min_break_even_amazon": average_min_break_even_amazon,
-            }
-        )
-        self.session.commit()
-
     def _calculate_shipping_cost(self, category_id: str) -> float:
         """Calculate shipping costs for a particular category."""
         records = (
@@ -99,10 +62,46 @@ class CategoryCalculator:
         )
         return average_shipping_cost
 
+    def _calculate_category(self, category_id: str) -> None:
+        """Perform calculations on a category then updates the record."""
+        category = self.session.query(CategoryDB).get(int(category_id))
+        calculated_shipping_cost = self._calculate_shipping_cost(category_id)
+        # will probably need to circle back on this. Probably too low of a breakeven.
+        estimated_shipping_cost = (
+            calculated_shipping_cost
+            if calculated_shipping_cost
+            else category.amazon_average_price * 0.1
+        )
+        average_min_break_even = (
+            category.amazon_average_price - estimated_shipping_cost
+        ) * (1 - GROSS_MARGIN_PERCENTAGE)
+        average_min_break_even_amazon = average_min_break_even + category.amazon_fee
+
+        self.session.query(CategoryDB).filter(CategoryDB.id == int(category_id)).update(
+            {
+                "average_min_break_even": average_min_break_even,
+                "average_min_break_even_amazon": average_min_break_even_amazon,
+            }
+        )
+        self.session.commit()
+
+    def _process_categories(self, category_ids: list[str]) -> None:
+        """Process categories and perform profitability calculations."""
+        for category_id in category_ids:
+            try:
+                self._calculate_category(category_id)
+            except Exception as e:
+                logging.exception(f"Exception calculations catgory: {e.__dict__}")
+                pass
+
     @classmethod
-    def run(cls):
-        """Public method for running item calculations on processable categories."""
-        cls()._check_categories()
+    def calculate_categories(cls) -> None:
+        """Check for categories that need to have calculations performed."""
+        klass = cls()
+        category_ids = klass.redis.lrange(CATEGORY_CALCULATOR_QUEUE, 0, -1)
+        klass.redis.delete(CATEGORY_CALCULATOR_QUEUE)
+
+        klass._process_categories(category_ids)
 
 
 class ItemCalculator:
@@ -112,21 +111,6 @@ class ItemCalculator:
         """Instantiate Redis."""
         self.redis = broker.redis()
         self.session = database.db.database_instance.get_session()
-
-    def _check_items(self) -> None:
-        """Check for items that need to have calculations performed."""
-        item_ids = self.redis.lrange(ITEM_CALCULATOR_QUEUE, 0, -1)
-        self.redis.delete(ITEM_CALCULATOR_QUEUE)
-        self._process_items(item_ids)
-
-    def _process_items(self, item_ids: list[str]) -> None:
-        """Process items and perform profitability calculations."""
-        for item_id in item_ids:
-            try:
-                self._calculate_item(item_id)
-            except Exception as e:
-                logging.exception(f"Exception calculations item: {e.__dict__}")
-                pass
 
     def _calculate_item(self, item_id) -> None:
         """Perform calculations on an item and updates the record."""
@@ -144,20 +128,33 @@ class ItemCalculator:
         )
         self.session.commit()
 
+    def _process_items(self, item_ids: list[str]) -> None:
+        """Process items and perform profitability calculations."""
+        for item_id in item_ids:
+            try:
+                self._calculate_item(item_id)
+            except Exception as e:
+                logging.exception(f"Exception calculations item: {e.__dict__}")
+                pass
+
     @classmethod
-    def run(cls):
-        """Public method for running item calculations on processable items."""
-        cls()._check_items()
+    def calculate_items(cls) -> None:
+        """Check for items that need to have calculations performed."""
+        klass = cls()
+        item_ids = klass.redis.lrange(ITEM_CALCULATOR_QUEUE, 0, -1)
+        klass.redis.delete(ITEM_CALCULATOR_QUEUE)
+
+        klass._process_items(item_ids)
 
 
 def calculate_categories():
     """Easy to use interface for running category calculations."""
-    CategoryCalculator.run()
+    CategoryCalculator.calculate_categories()
 
 
 def calculate_items():
     """Easy to use interface for running item calculations."""
-    ItemCalculator.run()
+    ItemCalculator.calculate_items()
 
 
 def calculate_all():

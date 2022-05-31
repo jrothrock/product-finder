@@ -4,73 +4,61 @@ import os
 import re
 import time
 
-import broker
-import database.db
 from database.db import Category as CategoryDB
-from scraper.core.drivers import Driver
+from scraper._types import ScraperContext
 
 CATEGORY_SHOPIFY_QUEUE = (
     "test:queue:category:shopify" if os.getenv("TEST_ENV") else "queue:category:shopify"
 )
 
 
-class ShopifyCategory(Driver):
-    """Class that holds procedures for scraping Shopify store counts."""
+def _get_number_of_sites(number_of_sites_elem_text: str) -> int:
+    """Get integer number of stores from text body."""
+    if found_results := re.search("About (.+) results", number_of_sites_elem_text):
+        return int(found_results.group(1).strip().replace(",", ""))
+    else:
+        return 0
 
-    def __init__(self):
-        """Instantiate Selenium Driver and Redis."""
-        super().__init__()
-        self.redis = broker.redis()
-        self.session = database.db.database_instance.get_session()
 
-    def _check_categories(self) -> None:
-        """Check the Shopify category queue and process categories."""
-        category_ids = self.redis.lrange(CATEGORY_SHOPIFY_QUEUE, 0, -1)
-        self.redis.delete(CATEGORY_SHOPIFY_QUEUE)
-        self._process_categories(category_ids)
+def _get_shopify(context: ScraperContext, category_id: str) -> None:
+    """Pull the shopify store count for a particular category from Google."""
+    category = context.pg_session.query(CategoryDB).get(int(category_id))
+    key_words = category.title.split("_")
+    context.browser.get(
+        "https://www.google.com/search?q=site%3Amyshopify.com+" + "+".join(key_words)
+    )
+    time.sleep(2)
+    number_of_sites_elem = context.browser.find_element_by_xpath(
+        "//div[contains(@id, 'result-stats')]"
+    )
+    number_of_shopify_sites = _get_number_of_sites(
+        number_of_sites_elem.get_attribute("innerHTML")
+    )
 
-    def _process_categories(self, category_ids) -> None:
-        """Process the shopify categories."""
-        for category_id in category_ids:
-            try:
-                self._get_shopify(category_id)
-            except Exception as e:
-                logging.exception(
-                    f"Exception scraping number of shopify sites: {e.__dict__}"
-                )
-                pass
+    context.pg_session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
+        {
+            "number_of_shopify_sites": number_of_shopify_sites,
+        }
+    )
+    context.pg_session.commit()
 
-    def _get_shopify(self, category_id: str) -> None:
-        """Pull the shopify store count for a particular category from Google."""
-        category = self.session.query(CategoryDB).get(int(category_id))
-        key_words = category.title.split("_")
-        self.driver.get(
-            "https://www.google.com/search?q=site%3Amyshopify.com+"
-            + "+".join(key_words)
-        )
-        time.sleep(2)
-        number_of_sites_elem = self.driver.find_element_by_xpath(
-            "//div[contains(@id, 'result-stats')]"
-        )
-        number_of_shopify_sites = self._get_number_of_sites(
-            number_of_sites_elem.get_attribute("innerHTML")
-        )
 
-        self.session.query(CategoryDB).filter(CategoryDB.id == category.id).update(
-            {
-                "number_of_shopify_sites": number_of_shopify_sites,
-            }
-        )
-        self.session.commit()
+def _process_categories(context: ScraperContext, category_ids: list[str]) -> None:
+    """Process the shopify categories."""
+    for category_id in category_ids:
+        try:
+            _get_shopify(context, category_id)
+        except Exception as e:
+            logging.exception(
+                f"Exception scraping number of shopify sites: {e.__dict__}"
+            )
+            pass
 
-    def _get_number_of_sites(self, number_of_sites_elem_text: str) -> int:
-        """Get integer number of stores from text body."""
-        if found_results := re.search("About (.+) results", number_of_sites_elem_text):
-            return int(found_results.group(1).strip().replace(",", ""))
-        else:
-            return 0
 
-    @classmethod
-    def run(cls):
-        """Public method for scraping Shopify store count for category."""
-        cls()._check_categories()
+def scrape_categories() -> None:
+    """Check the Shopify category queue and process categories."""
+    context = ScraperContext.new()
+    category_ids = context.redis.lrange(CATEGORY_SHOPIFY_QUEUE, 0, -1)
+    context.redis.delete(CATEGORY_SHOPIFY_QUEUE)
+
+    _process_categories(context, category_ids)

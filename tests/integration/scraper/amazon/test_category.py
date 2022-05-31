@@ -5,10 +5,10 @@ from unittest.mock import patch
 import pytest
 
 import broker
+import scraper.sites.amazon.category
 from database.category import Category as CategoryModel
 from database.db import Category as CategoryDB
 from database.db import Database
-from scraper.sites.amazon import category
 
 
 @patch(
@@ -61,7 +61,7 @@ def test_run():
     new_category = _setup_test()
     assert len(broker.redis().lrange("test:queue:category:amazon:listings", 0, -1)) == 1
 
-    category.AmazonCategory.run()
+    scraper.sites.amazon.category.scrape_amazon_categories()
 
     db = Database()
     session = db.get_session()

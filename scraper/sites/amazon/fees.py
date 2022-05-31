@@ -4,12 +4,10 @@ import os
 import time
 import typing
 
-import broker
-import database.db
 import utils.mappings as mappings
 from database.db import Category as CategoryDB
 from database.db import Item as ItemDB
-from scraper.core.drivers import Driver
+from scraper._types import ScraperContext
 
 ITEM_AMAZON_FEES_QUEUE = (
     "test:queue:item:amazon:fees" if os.getenv("TEST_ENV") else "queue:item:amazon:fees"
@@ -32,149 +30,136 @@ CATEGORY_AMAZON_FEES_QUEUE = (
 )
 
 
-class AmazonFee(Driver):
-    """Class that holds procedures for scraping Amazon fees."""
+def _add_to_redis_queue(
+    context: ScraperContext,
+    record_id: str,
+    db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB],
+) -> None:
+    """Add the record id to correct queue to have calculations (re)run on the record later."""
+    if db_klass == ItemDB:
+        ScraperContext.redis.rpush(ITEM_CALCULATOR_QUEUE, record_id)
+    else:
+        ScraperContext.redis.rpush(CATEGORY_CALCULATOR_QUEUE, record_id)
 
-    def __init__(self):
-        """Instantiate Selenium Driver and Redis."""
-        super().__init__()
-        self.redis = broker.redis()
-        self.session = database.db.database_instance.get_session()
 
-    def _check_categories(self) -> None:
-        """Check the Amazon category fees queue and process the categories."""
-        category_ids = self.redis.lrange(CATEGORY_AMAZON_FEES_QUEUE, 0, -1)
-        self.redis.delete(CATEGORY_AMAZON_FEES_QUEUE)
-        self._process_record(category_ids, CategoryDB)
+def _get_amazon(
+    context: ScraperContext,
+    record_id: str,
+    db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB],
+) -> None:
+    """
+    Scrape the amazon page for a particular category or item.
 
-    def _check_items(self) -> None:
-        """Check the Amazon item fees queue and process the items."""
-        item_ids = self.redis.lrange(ITEM_AMAZON_FEES_QUEUE, 0, -1)
-        self.redis.delete(ITEM_AMAZON_FEES_QUEUE)
-        self._process_record(item_ids, ItemDB)
+    Will also update the record with the calculated amazon fee -- can be either a
+    item or category record.
+    """
+    time.sleep(1)
+    record = context.pg_session.query(db_klass).get(int(record_id))
+    context.browser.get(
+        "https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index?lang=en_US"
+    )
+    time.sleep(1)
 
-    def _process_record(
-        self,
-        record_ids: list[str],
-        db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB],
-    ):
-        """
-        Process the records and try and calculate the amazon fees for the record.
+    context.browser.find_element_by_xpath(
+        "//input[contains(@aria-labelledby, 'link_continue-announce')]"
+    ).click()
 
-        If the fee can't be calculated, add it to calculation queue anyways, the
-        calculation task can handle the null values -- though ideally the record would
-        have them.
-        """
-        for record_id in record_ids:
-            try:
-                self._get_amazon(record_id, db_klass)
-            except Exception as e:
-                self._add_to_redis_queue(record_id, db_klass)
-                logging.exception(
-                    f"Exception scraping amazon category fees: {e.__dict__}"
-                )
-                pass
+    record_length = (
+        record.length if isinstance(record, ItemDB) else record.amazon_average_length
+    )
 
-    def _add_to_redis_queue(
-        self, record_id: str, db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB]
-    ) -> None:
-        """Add the record id to correct queue to have calculations (re)run on the record later."""
-        if db_klass == ItemDB:
-            self.redis.rpush(ITEM_CALCULATOR_QUEUE, record_id)
-        else:
-            self.redis.rpush(CATEGORY_CALCULATOR_QUEUE, record_id)
+    context.browser.find_element_by_id("product-length").send_keys(
+        str(round(record_length, 2))
+    )
 
-    def _get_amazon(
-        self, record_id: str, db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB]
-    ) -> None:
-        """
-        Scrape the amazon page for a particular category or item.
+    record_width = (
+        record.width if isinstance(record, ItemDB) else record.amazon_average_width
+    )
+    context.browser.find_element_by_id("product-width").send_keys(
+        str(round(record_width, 2))
+    )
 
-        Will also update the record with the calculated amazon fee -- can be either a
-        item or category record.
-        """
-        time.sleep(1)
-        record = self.session.query(db_klass).get(int(record_id))
-        self.driver.get(
-            "https://sellercentral.amazon.com/hz/fba/profitabilitycalculator/index?lang=en_US"
-        )
-        time.sleep(1)
+    record_height = (
+        record.height if isinstance(record, ItemDB) else record.amazon_average_height
+    )
+    context.browser.find_element_by_id("product-height").send_keys(
+        str(round(record_height, 2))
+    )
 
-        self.driver.find_element_by_xpath(
-            "//input[contains(@aria-labelledby, 'link_continue-announce')]"
-        ).click()
+    record_weight = (
+        record.weight if isinstance(record, ItemDB) else record.amazon_average_weight
+    )
+    context.browser.find_element_by_id("product-weight").send_keys(
+        str(round(record_weight, 2))
+    )
 
-        record_length = (
-            record.length
-            if isinstance(record, ItemDB)
-            else record.amazon_average_length
-        )
+    context.browser.find_element_by_xpath(
+        "//span[contains(text(), 'Select category')]"
+    ).click()
 
-        self.driver.find_element_by_id("product-length").send_keys(
-            str(round(record_length, 2))
-        )
+    mapped_amazon_category = mappings.map_amazon_category(record.amazon_category)
 
-        record_width = (
-            record.width if isinstance(record, ItemDB) else record.amazon_average_width
-        )
-        self.driver.find_element_by_id("product-width").send_keys(
-            str(round(record_width, 2))
-        )
+    context.browser.find_element_by_xpath(
+        "//a[contains(text(), '" + mapped_amazon_category + "')]"
+    ).click()
 
-        record_height = (
-            record.height
-            if isinstance(record, ItemDB)
-            else record.amazon_average_height
-        )
-        self.driver.find_element_by_id("product-height").send_keys(
-            str(round(record_height, 2))
-        )
+    context.browser.find_element_by_id("estimate-new-announce").click()
 
-        record_weight = (
-            record.weight
-            if isinstance(record, ItemDB)
-            else record.amazon_average_weight
-        )
-        self.driver.find_element_by_id("product-weight").send_keys(
-            str(round(record_weight, 2))
-        )
+    context.browser.execute_script(
+        "window.scrollTo(0,document.body.scrollHeight - 250);"
+    )
 
-        self.driver.find_element_by_xpath(
-            "//span[contains(text(), 'Select category')]"
-        ).click()
+    time.sleep(1)
 
-        mapped_amazon_category = mappings.map_amazon_category(record.amazon_category)
+    amazon_fees = context.browser.find_element_by_id(
+        "afn-seller-proceeds"
+    ).get_attribute("value")
+    context.pg_session.query(db_klass).filter(db_klass.id == record.id).update(
+        {"amazon_fee": float(amazon_fees[1:])}
+    )
+    context.pg_session.commit()
 
-        self.driver.find_element_by_xpath(
-            "//a[contains(text(), '" + mapped_amazon_category + "')]"
-        ).click()
+    _add_to_redis_queue(context, record_id, db_klass)
 
-        self.driver.find_element_by_id("estimate-new-announce").click()
+    context.browser.delete_all_cookies()
 
-        self.driver.execute_script(
-            "window.scrollTo(0,document.body.scrollHeight - 250);"
-        )
 
-        time.sleep(1)
+def _process_records(
+    context: ScraperContext,
+    record_ids: list[str],
+    db_klass: typing.Type[ItemDB] | typing.Type[CategoryDB],
+):
+    """
+    Process the records and try and calculate the amazon fees for the record.
 
-        amazon_fees = self.driver.find_element_by_id(
-            "afn-seller-proceeds"
-        ).get_attribute("value")
-        self.session.query(db_klass).filter(db_klass.id == record.id).update(
-            {"amazon_fee": float(amazon_fees[1:])}
-        )
-        self.session.commit()
+    If the fee can't be calculated, add it to calculation queue anyways, the
+    calculation task can handle the null values -- though ideally the record would
+    have them.
+    """
+    for record_id in record_ids:
+        try:
+            _get_amazon(context, record_id, db_klass)
+        except Exception as e:
+            _add_to_redis_queue(context, record_id, db_klass)
+            logging.exception(f"Exception scraping amazon category fees: {e.__dict__}")
+            pass
 
-        self._add_to_redis_queue(record_id, db_klass)
 
-        self.driver.delete_all_cookies()
+def scrape_category_fees() -> None:
+    """Check the Amazon category fees queue and process the categories."""
+    context = ScraperContext.new()
 
-    @classmethod
-    def run_item_fees(cls):
-        """Public method to instantiate scraping Amazon fees for items."""
-        cls()._check_items()
+    category_ids = context.redis.lrange(CATEGORY_AMAZON_FEES_QUEUE, 0, -1)
+    context.redis.delete(CATEGORY_AMAZON_FEES_QUEUE)
 
-    @classmethod
-    def run_category_fees(cls):
-        """Public method to instantiate scraping Amazon fees for categories."""
-        cls()._check_categories()
+    _process_records(context, category_ids, CategoryDB)
+
+
+def scrape_item_fees() -> None:
+    """Check the Amazon item fees queue and process the items."""
+    context = ScraperContext.new()
+
+    item_ids = context.redis.lrange(ITEM_AMAZON_FEES_QUEUE, 0, -1)
+    context.redis.delete(ITEM_AMAZON_FEES_QUEUE)
+
+    _process_records(context, item_ids, ItemDB)
